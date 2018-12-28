@@ -7,19 +7,53 @@
 #    http://shiny.rstudio.com/
 #
 
-library(shiny)
+## app.R ##
 library(shinydashboard)
 
-# Define UI for application that draws a histogram
-
-dashboardPage(
-  dashboardHeader( title = "Miradashboard"),
-  dashboardSidebar(),
+ui <- dashboardPage(
+  dashboardHeader(title = "Miradashboard"
+                  
+                  
+                  
+                  ),
+  dashboardSidebar(
+    ## Sidebar content
+    dashboardSidebar(
+      sidebarMenu(
+        menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
+        menuItem("Widgets", tabName = "widgets", icon = icon("th")),
+        menuItem("Reports", tabName = "reports", icon = icon("th")),
+        menuItem("OpsCare Clients", tabName = "OpsCare Clients", icon = icon("th")),
+        menuItem("ProdCare Clients", tabName = "ProdCare Clients", icon = icon("th")),
+        menuItem("Alerts", tabName = "Alerts", icon = icon("th")),
+        menuItem("Change Requests", tabName = "Change Requests", icon = icon("th")),
+        menuItem("Maintenance Windows", tabName = "Maintenance Windows", icon = icon("th"))
+      )
+    )
+  ),
   dashboardBody(
     # Boxes need to be put in a row (or column)
+    fluidRow(
+      box(plotOutput("plot1", height = 250)),
+      box(plotOutput("plot2", height = 250)),
+      box(plotOutput("plot3", height = 250)),
+      box(plotOutput("plot4", height = 250)),
       box(
-        title = "Alarm Incidents",
-        sliderInput("slider", "Event History (# of Days):", 1, 15, 30)
+        title = "Controls",
+        sliderInput("slider", "Number of observations:", 1, 100, 50)
       )
+    )
   )
 )
+
+server <- function(input, output) {
+  set.seed(122)
+  histdata <- rnorm(500)
+  
+  output$plot1 <- renderPlot({
+    data <- histdata[seq_len(input$slider)]
+    hist(data)
+  })
+}
+
+shinyApp(ui, server)
