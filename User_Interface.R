@@ -8,12 +8,66 @@
 #
 
 ## app.R ##
+library(shiny)
 library(shinydashboard)
+library(shinydashboardPlus)
+shinyApp(ui = ui, server = server, options = list(height = 1080))
 
 ui <- dashboardPage(
-  dashboardHeader(title = "Miradashboard"
-                  
-                  
+  dashboardHeader(title = "Miradashboard",
+# This drop-down menu offers user and system administration within the application
+                  dropdownMenu(type = "messages",
+                               messageItem(
+                                 from = "Sales Dept",
+                                 message = "Sales are steady this month."
+                               ),
+                               messageItem(
+                                 from = "New User",
+                                 message = "How do I register?",
+                                 icon = icon("question"),
+                                 time = "13:45"
+                               ),
+                               messageItem(
+                                 from = "Support",
+                                 message = "The new server is ready.",
+                                 icon = icon("life-ring"),
+                                 time = "2014-12-01"
+                               )
+                  ),
+# This is a drop-down menu for checking notifications.
+# This should alert users of alerts that have not been merged to a case in the last 15 days.
+                  dropdownMenu(type = "notifications",
+                               notificationItem(
+                                 text = "5 new users today",
+                                 icon("users")
+                               ),
+                               notificationItem(
+                                 text = "12 items delivered",
+                                 icon("truck"),
+                                 status = "success"
+                               ),
+                               notificationItem(
+                                 text = "Server load at 86%",
+                                 icon = icon("exclamation-triangle"),
+                                 status = "warning"
+                               )
+                  ),
+# This is a drop-down menu for checking tasks.
+# This drop-down menu will eventually offer suggestions based off of ML Algorithms.
+                  dropdownMenu(type = "tasks", badgeStatus = "success",
+                               taskItem(value = 90, color = "green",
+                                        "Documentation"
+                               ),
+                               taskItem(value = 17, color = "aqua",
+                                        "Project X"
+                               ),
+                               taskItem(value = 75, color = "yellow",
+                                        "Server deployment"
+                               ),
+                               taskItem(value = 80, color = "red",
+                                        "Overall project"
+                               )
+                  )
                   
                   ),
   dashboardSidebar(
