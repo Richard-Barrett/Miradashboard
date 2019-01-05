@@ -11,7 +11,7 @@
 library(shiny)
 library(shinydashboard)
 library(shinydashboardPlus)
-shinyApp(ui = ui, server = server, options = list(height = 1080))
+#shinyApp(ui = ui, server = server, options = list(height = 1080))
 
 ui <- dashboardPage(
   dashboardHeader(title = "Miradashboard",
@@ -69,6 +69,8 @@ ui <- dashboardPage(
                                )
                   )
                   
+                  
+                  
                   ),
   dashboardSidebar(
     ## Sidebar content
@@ -77,11 +79,12 @@ ui <- dashboardPage(
         menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
         menuItem("Widgets", tabName = "widgets", icon = icon("th")),
         menuItem("Reports", tabName = "reports", icon = icon("th")),
-        menuItem("OpsCare Clients", tabName = "OpsCare Clients", icon = icon("th")),
-        menuItem("ProdCare Clients", tabName = "ProdCare Clients", icon = icon("th")),
-        menuItem("Alerts", tabName = "Alerts", icon = icon("th")),
-        menuItem("Change Requests", tabName = "Change Requests", icon = icon("th")),
-        menuItem("Maintenance Windows", tabName = "Maintenance Windows", icon = icon("th"))
+        menuItem("OpsCare Clients", tabName = "OpsCare Clients", icon = icon("bar-chart-o")),
+        menuItem("ProdCare Clients", tabName = "ProdCare Clients", icon = icon("bar-chart-o")),
+        menuItem("Alerts", tabName = "Alerts", icon = icon("bar-chart-o")),
+        menuItem("Change Requests", tabName = "Change Requests", icon = icon("list-alt")),
+        menuItem("Maintenance Windows", tabName = "Maintenance Windows", icon = icon("list-alt")),
+        menuItem("Salesforce", tabname = "Salesforce", icon = icon("table"))
       )
     )
   ),
