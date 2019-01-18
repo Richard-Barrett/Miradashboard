@@ -3,6 +3,10 @@
 # Version 1.0
 # ==========================
 
+# Report Notes & Functionality
+# ============================
+# Note: this will be provided to Senior Technical Engineer every team meeting
+
 # This report shows the cases with Broken SLA's by severity.
 # Shows that we are failing to close cases by SLA.
 # Quantify the frequency of cases with broken SLA's over time.
