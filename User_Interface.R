@@ -15,7 +15,7 @@ library(shinydashboardPlus)
 
 ui <- dashboardPage(
   dashboardHeader(title = "Miradashboard",
-# This drop-down menu offers user and system administration within the application
+                  # This drop-down menu offers user and system administration within the application
                   dropdownMenu(type = "messages",
                                messageItem(
                                  from = "Sales Dept",
@@ -34,8 +34,8 @@ ui <- dashboardPage(
                                  time = "2014-12-01"
                                )
                   ),
-# This is a drop-down menu for checking notifications.
-# This should alert users of alerts that have not been merged to a case in the last 15 days.
+                  # This is a drop-down menu for checking notifications.
+                  # This should alert users of alerts that have not been merged to a case in the last 15 days.
                   dropdownMenu(type = "notifications",
                                notificationItem(
                                  text = "5 new users today",
@@ -52,8 +52,8 @@ ui <- dashboardPage(
                                  status = "warning"
                                )
                   ),
-# This is a drop-down menu for checking tasks.
-# This drop-down menu will eventually offer suggestions based off of ML Algorithms.
+                  # This is a drop-down menu for checking tasks.
+                  # This drop-down menu will eventually offer suggestions based off of ML Algorithms.
                   dropdownMenu(type = "tasks", badgeStatus = "success",
                                taskItem(value = 90, color = "green",
                                         "Documentation"
@@ -71,7 +71,7 @@ ui <- dashboardPage(
                   
                   
                   
-                  ),
+  ),
   dashboardSidebar(
     ## Sidebar content
     dashboardSidebar(
@@ -84,7 +84,8 @@ ui <- dashboardPage(
         menuItem("Alerts", tabName = "Alerts", icon = icon("bar-chart-o")),
         menuItem("Change Requests", tabName = "Change Requests", icon = icon("list-alt")),
         menuItem("Maintenance Windows", tabName = "Maintenance Windows", icon = icon("list-alt")),
-        menuItem("Salesforce", tabname = "Salesforce", icon = icon("table"))
+        menuItem("Rundeck", tabName = "Rundeck", icon = icon("bars")),
+        menuItem("Salesforce", tabName = "Salesforce", icon = icon("bars"))
       )
     )
   ),
@@ -94,7 +95,7 @@ ui <- dashboardPage(
       box(plotOutput("plot1", height = 250)),
       box(plotOutput("plot2", height = 250)),
       box(plotOutput("plot3", height = 250)),
-      box(plotOutput("plot4", height = 250)),
+      #box(plotOutput("plot4", height = 250)),
       box(
         title = "Controls",
         sliderInput("slider", "Number of observations:", 1, 100, 50)
@@ -108,9 +109,9 @@ server <- function(input, output) {
   histdata <- rnorm(500)
   
   output$plot1 <- renderPlot({
-    data <- histdata[seq_len(input$slider)]
+   data <- histdata[seq_len(input$slider)]
     hist(data)
   })
-}
+  }
 
 shinyApp(ui, server)
