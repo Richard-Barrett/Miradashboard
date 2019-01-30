@@ -96,6 +96,7 @@ ui <- dashboardPage(
       box(plotOutput("plot2", height = 250)),
       box(plotOutput("plot3", height = 250)),
       #box(plotOutput("plot4", height = 250)),
+      box(dataTableOutput("DT1", height = 250)),
       box(
         title = "Controls",
         sliderInput("slider", "Number of observations:", 1, 100, 50)
@@ -108,8 +109,28 @@ server <- function(input, output) {
   set.seed(122)
   histdata <- rnorm(500)
   
+  # List Server Output whereby plot[1-#] is the plot box output in UI above.
+  # Server Output occurds and is defined by data variables
+  # histdata[seq_len(input$slider)] defines slider utilization
+  # hist(data) defines histogram off of "data"te
   output$plot1 <- renderPlot({
    data <- histdata[seq_len(input$slider)]
+    hist(data)
+  })
+  output$plot2 <- renderPlot({
+    data <- histdata[seq_len(input$slider)]
+    hist(data)
+  })
+  output$plot3 <- renderPlot({
+    data <- histdata[seq_len(input$slider)]
+    hist(data)
+  })
+  output$plot4 <- renderPlot({
+    data <- histdata[seq_len(input$slider)]
+    hist(data)
+  })
+  output$plot5 <- renderPlot({
+    data <- histdata[seq_len(input$slider)]
     hist(data)
   })
   }
