@@ -8,12 +8,15 @@
 #
 
 ## app.R ##
-library(shiny)
-library(shinydashboard)
 library(shinydashboardPlus)
+library(shinydashboard)
+library(shiny)
+
 #shinyApp(ui = ui, server = server, options = list(height = 1080))
 
-ui <- dashboardPage(
+# User Interface Body Code is foun below:
+# =======================================
+ui <- dashboardPage(skin = "red",
   dashboardHeader(title = "Miradashboard",
                   # This drop-down menu offers user and system administration within the application
                   dropdownMenu(type = "messages",
@@ -85,7 +88,9 @@ ui <- dashboardPage(
         menuItem("Change Requests", tabName = "Change Requests", icon = icon("list-alt")),
         menuItem("Maintenance Windows", tabName = "Maintenance Windows", icon = icon("list-alt")),
         menuItem("Rundeck", tabName = "Rundeck", icon = icon("bars")),
-        menuItem("Salesforce", tabName = "Salesforce", icon = icon("bars"))
+        menuItem("Salesforce", tabName = "Salesforce", icon = icon("bars")),
+        menuItem("Handovers", tabName = "Handovers", icon = icon("bars")),
+        menuItem("Jump-Host Access", tabName = "Jump-Host Access", icon = icon("bars"))
       )
     )
   ),
@@ -96,7 +101,7 @@ ui <- dashboardPage(
       box(plotOutput("plot2", height = 250)),
       box(plotOutput("plot3", height = 250)),
       #box(plotOutput("plot4", height = 250)),
-      box(dataTableOutput("DT1", height = 250)),
+      #box(dataTableOutput("DT1", height = 250)),
       box(
         title = "Controls",
         sliderInput("slider", "Number of observations:", 1, 100, 50)
@@ -105,6 +110,11 @@ ui <- dashboardPage(
   )
 )
 
+
+
+
+# Output Blocks for Block Panes can e found below:
+# ================================================
 server <- function(input, output) {
   set.seed(122)
   histdata <- rnorm(500)
@@ -114,7 +124,7 @@ server <- function(input, output) {
   # histdata[seq_len(input$slider)] defines slider utilization
   # hist(data) defines histogram off of "data"te
   output$plot1 <- renderPlot({
-   data <- histdata[seq_len(input$slider)]
+    data <- histdata[seq_len(input$slider)]
     hist(data)
   })
   output$plot2 <- renderPlot({
@@ -133,6 +143,6 @@ server <- function(input, output) {
     data <- histdata[seq_len(input$slider)]
     hist(data)
   })
-  }
+}
 
 shinyApp(ui, server)
