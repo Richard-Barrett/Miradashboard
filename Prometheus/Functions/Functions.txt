@@ -1,0 +1,4 @@
+# Created by Richard Barrett
+
+# Show the memory in use by VMs v. ompute Host Memory 
+procstat_memory_vms{process_name="ovs-vswitchd"} / on(host) mem_total
