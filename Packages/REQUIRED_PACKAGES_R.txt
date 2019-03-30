@@ -1,0 +1,7 @@
+#REQUIRED_PACKAGES_R
+googlesheets
+rsconnect
+shiny
+shinydashboard
+shinydashboardPlus
+ggplot2
