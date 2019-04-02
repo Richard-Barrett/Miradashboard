@@ -80,7 +80,7 @@ ui <- dashboardPage(skin = "red",
                       dashboardSidebar(
                         sidebarMenu(
                           menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
-                          menuItem("Widgets", tabName = "widgets", icon = icon("th")),
+                          #menuItem("Widgets", tabName = "widgets", icon = icon("th")),
                           menuItem("Reports", tabName = "reports", icon = icon("chart-line")),
                           menuItem("OpsCare Clients", tabName = "OpsCare Clients", icon = icon("bar-chart-o")),
                           menuItem("ProdCare Clients", tabName = "ProdCare Clients", icon = icon("bar-chart-o")),
