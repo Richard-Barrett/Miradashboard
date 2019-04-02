@@ -13,9 +13,12 @@ library(shinydashboard)
 library(shiny)
 library(rsconnect)
 library(googlesheets)
+library(RCurl)
+library(httr)
+library(mosaic)
+library(DT)
 
 #shinyApp(ui = ui, server = server, options = list(height = 1080))
-
 ui <- dashboardPage(skin = "red",
                     dashboardHeader(title = "Miradashboard",
                                     # This drop-down menu offers user and system administration within the application
@@ -79,7 +82,7 @@ ui <- dashboardPage(skin = "red",
                       ## Sidebar content
                       dashboardSidebar(
                         sidebarMenu(
-                          menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
+                          #menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
                           #menuItem("Widgets", tabName = "widgets", icon = icon("th")),
                           menuItem("Reports", tabName = "reports", icon = icon("chart-line")),
                           menuItem("OpsCare Clients", tabName = "OpsCare Clients", icon = icon("bar-chart-o")),
@@ -104,10 +107,14 @@ ui <- dashboardPage(skin = "red",
                     dashboardBody(
                       # Boxes need to be put in a row (or column)
                       fluidRow(
+                        #box(plotOutput("plot1", height = 250)),
+                        #box(plotOutput("plot2", height = 250)),
+                        #box(plotOutput("plot3", height = 250)),
+                        #box(plotOutput("plot4", height = 250)),
+                        h2("Handovers"),
+                        DT::dataTableOutput("mytable", width = "auto", height = "auto"),
                         box(plotOutput("plot1", height = 250)),
                         box(plotOutput("plot2", height = 250)),
-                        box(plotOutput("plot3", height = 250)),
-                        box(plotOutput("plot4", height = 250)),
                         #box(dataTableOutput("DT1", height = 250))
                         box(
                           title = "Controls",
@@ -120,6 +127,10 @@ ui <- dashboardPage(skin = "red",
 server <- function(input, output) {
   set.seed(122)
   histdata <- rnorm(500)
+  
+  output$mytable = DT::renderDataTable({
+    mtcars
+  })
   
   # List Server Output whereby plot[1-#] is the plot box output in UI above.
   # Server Output occurds and is defined by data variables
@@ -146,5 +157,19 @@ server <- function(input, output) {
     hist(data)
   })
 }
+
+gap_ss <- gs_gap()
+
+gap_data <- gs_read(gap_ss)
+
+shinyServer(function(input, output, session) {
+  
+  output$the_data <- renderDataTable({
+    
+    datatable(gap_data)
+    
+  })
+  
+})
 
 shinyApp(ui, server)
