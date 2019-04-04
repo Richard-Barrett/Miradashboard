@@ -15,8 +15,25 @@ library(rsconnect)
 library(googlesheets)
 library(RCurl)
 library(httr)
+library(dpylr)
 library(mosaic)
 library(DT)
+library(googleCharts)
+
+# Google Sheet Data
+gs_auth(new_user = FALSE)
+handover <- gs_key("1Wu8gJyzw6o7BS4GoR7pM_NofHyXvOzDMK3O-VVHcB8c")
+#cr_mw_data <- gs_key("1ga7s1vgMhYRNvr2WL6vjv_VRYtP5nI0aMoweLAjB6v4")
+sev3_sev4_data <- gs_key("1ga7s1vgMhYRNvr2WL6vjv_VRYtP5nI0aMoweLAjB6v4")
+
+for_gs_sheet <- gs_read(handover)
+str(for_gs_sheet)
+
+for_gs_sheet <- gs_read(sev3_sev4_data)
+str(for_gs_sheet)
+
+## Identifies the handover Google Sheet
+## handover_sheet = gs_url("https://docs.google.com/spreadsheets/d/1Wu8gJyzw6o7BS4GoR7pM_NofHyXvOzDMK3O-VVHcB8c/edit#gid=0")
 
 #shinyApp(ui = ui, server = server, options = list(height = 1080))
 ui <- dashboardPage(skin = "red",
@@ -74,18 +91,17 @@ ui <- dashboardPage(skin = "red",
                                                           "Overall project"
                                                  )
                                     )
-                                    
-                                    
-                                    
                     ),
+                    
                     dashboardSidebar(
                       ## Sidebar content
                       dashboardSidebar(
                         sidebarMenu(
-                          #menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
+                          menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
                           #menuItem("Widgets", tabName = "widgets", icon = icon("th")),
                           menuItem("Reports", tabName = "reports", icon = icon("chart-line")),
                           menuItem("OpsCare Clients", tabName = "OpsCare Clients", icon = icon("bar-chart-o")),
+                          menuItem("Top 10 Clients", tabName = "Top 10 Clients", icon = icon("bar-chart-o")),
                           menuItem("ProdCare Clients", tabName = "ProdCare Clients", icon = icon("bar-chart-o")),
                           menuItem("Alerts", tabName = "Alerts", icon = icon("bar-chart-o")),
                           menuItem("Change Requests", tabName = "Change Requests", icon = icon("list-alt")),
@@ -99,6 +115,7 @@ ui <- dashboardPage(skin = "red",
                           menuItem("Jump-Host Access", tabName = "Jump-Host Access", icon = icon("bars")),
                           menuItem("Mirantis HT Wiki", icon = icon("bars"), 
                                    href = "https://mirantis.jira.com/wiki/spaces/2S/pages/1254621239/L1+-+General+Queue+Help+Desk+Team"),
+                          menuItem("Slack", icon = icon("slack"), href = "https://miracloud.slack.com"),
                           menuItem("Source code", icon = icon("github"), 
                                    href = "https://github.com/Richard-Barrett/Miradashboard")
                         )
@@ -111,9 +128,24 @@ ui <- dashboardPage(skin = "red",
                         #box(plotOutput("plot2", height = 250)),
                         #box(plotOutput("plot3", height = 250)),
                         #box(plotOutput("plot4", height = 250)),
-                        h2("Handovers"),
+                        h1("Handovers"),
                         DT::dataTableOutput("mytable", width = "auto", height = "auto"),
-                        box(plotOutput("plot1", height = 250)),
+                        #box(plotOutput("plot1", height = 250)),
+                        #box(gs_read(ss, ws = "handover")),
+                        #box(plotOutput("plot3", height = 250)),
+                        #box(plotOutput("plot4", height = 250)),
+                        
+                        #Example Attachment Box 
+                        #box(
+                        #  title = "Attachment example",
+                        #  attachmentBlock(
+                        #    src = "http://kiev.carpediem.cd/data/afisha/o/2d/c7/2dc7670333.jpg",
+                        #    title = "Test",
+                        #    title_url = "http://google.com",
+                        #    "This is the content"
+                        #  )
+                        #),
+                        
                         box(plotOutput("plot2", height = 250)),
                         #box(dataTableOutput("DT1", height = 250))
                         box(
@@ -129,13 +161,13 @@ server <- function(input, output) {
   histdata <- rnorm(500)
   
   output$mytable = DT::renderDataTable({
-    mtcars
+    df <- gs_read(handover)
   })
   
   # List Server Output whereby plot[1-#] is the plot box output in UI above.
-  # Server Output occurds and is defined by data variables
+  # Server Output occurs and is defined by data variables
   # histdata[seq_len(input$slider)] defines slider utilization
-  # hist(data) defines histogram off of "data"te
+  # hist(data) defines histogram off of "data"
   output$plot1 <- renderPlot({
     data <- histdata[seq_len(input$slider)]
     hist(data)
@@ -156,20 +188,7 @@ server <- function(input, output) {
     data <- histdata[seq_len(input$slider)]
     hist(data)
   })
+
 }
-
-gap_ss <- gs_gap()
-
-gap_data <- gs_read(gap_ss)
-
-shinyServer(function(input, output, session) {
-  
-  output$the_data <- renderDataTable({
-    
-    datatable(gap_data)
-    
-  })
-  
-})
 
 shinyApp(ui, server)
