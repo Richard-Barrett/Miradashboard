@@ -15,16 +15,36 @@ library(rsconnect)
 library(googlesheets)
 library(RCurl)
 library(httr)
-library(dpylr)
+library(dplyr)
 library(mosaic)
 library(DT)
 library(googleCharts)
+library(fontawesome)
 
-# Google Sheet Data
+Logged <- FALSE;
+LoginPass <- 0; #0: not attempted, -1: failed, 1: passed
+
+login <- box(title = "Login",textInput("userName", "Username (user)"),
+             passwordInput("passwd", "Password (test)"),
+             br(),actionButton("Login", "Log in"))
+
+loginfail <- box(title = "Login",textInput("userName", "Username"),
+                 passwordInput("passwd", "Password"),
+                 p("Username or password incorrect"),
+                 br(),actionButton("Login", "Log in"))
+
+
+# Google Sheets for Synced Keys with Data Master
 gs_auth(new_user = FALSE)
 handover <- gs_key("1Wu8gJyzw6o7BS4GoR7pM_NofHyXvOzDMK3O-VVHcB8c")
-#cr_mw_data <- gs_key("1ga7s1vgMhYRNvr2WL6vjv_VRYtP5nI0aMoweLAjB6v4")
+#cr_mw_data <- gs_key("Insert_Key")
 sev3_sev4_data <- gs_key("1ga7s1vgMhYRNvr2WL6vjv_VRYtP5nI0aMoweLAjB6v4")
+#all_alerts_data <- gs_key("Insert_Key")
+#case_wo_key_5 <- gs_key("Insert_Key")
+#sc_sev_1_cases <- gs_key("Insert_Key")
+#subscriptios <- gs_key("Insert_Key")
+bimonthly_ttr <- gs_key("1TiQeStsuwATHWxExV_Pdb2rSuOlOPB3KcYbPKFOj8VQ")
+
 
 for_gs_sheet <- gs_read(handover)
 str(for_gs_sheet)
@@ -32,10 +52,14 @@ str(for_gs_sheet)
 for_gs_sheet <- gs_read(sev3_sev4_data)
 str(for_gs_sheet)
 
-## Identifies the handover Google Sheet
-## handover_sheet = gs_url("https://docs.google.com/spreadsheets/d/1Wu8gJyzw6o7BS4GoR7pM_NofHyXvOzDMK3O-VVHcB8c/edit#gid=0")
+for_gs_sheet <- gs_read(bimonthly_ttr)
+str(for_gs_sheet)
 
+## Identifies the Google Sheet in Question
+## handover_sheet = gs_url("https://docs.google.com/spreadsheets/d/1Wu8gJyzw6o7BS4GoR7pM_NofHyXvOzDMK3O-VVHcB8c/edit#gid=0")
+## bimonthly_ttr = gs_url("https://docs.google.com/spreadsheets/d/1TiQeStsuwATHWxExV_Pdb2rSuOlOPB3KcYbPKFOj8VQ/edit#gid=0")
 #shinyApp(ui = ui, server = server, options = list(height = 1080))
+
 ui <- dashboardPage(skin = "red",
                     dashboardHeader(title = "Miradashboard",
                                     # This drop-down menu offers user and system administration within the application
@@ -97,31 +121,67 @@ ui <- dashboardPage(skin = "red",
                       ## Sidebar content
                       dashboardSidebar(
                         sidebarMenu(
-                          menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
-                          #menuItem("Widgets", tabName = "widgets", icon = icon("th")),
-                          menuItem("Reports", tabName = "reports", icon = icon("chart-line")),
-                          menuItem("OpsCare Clients", tabName = "OpsCare Clients", icon = icon("bar-chart-o")),
-                          menuItem("Top 10 Clients", tabName = "Top 10 Clients", icon = icon("bar-chart-o")),
-                          menuItem("ProdCare Clients", tabName = "ProdCare Clients", icon = icon("bar-chart-o")),
-                          menuItem("Alerts", tabName = "Alerts", icon = icon("bar-chart-o")),
-                          menuItem("Change Requests", tabName = "Change Requests", icon = icon("list-alt")),
-                          menuItem("Maintenance Windows", tabName = "Maintenance Windows", icon = icon("list-alt")),
-                          menuItem("Rundeck", icon = icon("code"), 
+                          sidebarSearchForm(textId = "searchText", buttonId = "searchButton",
+                                            label = "Search..."),
+                            menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
+                            menuItem("Data", icon = icon("th"), href = "https://docs.google.com/spreadsheets/d/1ga7s1vgMhYRNvr2WL6vjv_VRYtP5nI0aMoweLAjB6v4/edit#gid=1342420852"),
+                            menuItem("Widgets", icon = icon("th"), href = "https://shiny.rstudio.com/gallery/", newtab = FALSE),
+                            menuItem("Mirantis Directory", icon = icon("sitemap") ,href = "https://directory.mirantis.com/#/resources/staffing"),
+                            menuItem("Reports", tabName = "reports", icon = icon("chart-line"), startExpanded = FALSE,
+                                   menuSubItem("All Alerts", tabName = "All Alerts", icon = icon("dna")),
+                                   menuSubItem("All CR & MW", tabName = "All CR & MW", icon = icon("dna")),
+                                   menuSubItem("Sev3 & Sev4 Data", tabName = "Sev3 & Sev4 Data", icon = icon("dna")),
+                                   menuSubItem("SC Sev1 Cases", tabName = "SC Sev1 Cases", icon = icon("dna")),
+                                   menuSubItem("Cases with Key 5 Updates", tabName = "Cases with Key 5 Updates", icon = icon("dna")),
+                                   menuSubItem("Cases without Key 5 Updates", tabName = "Cases without Key 5 Updates", icon = icon("dna")),
+                                   menuSubItem("Auto Refresh Execution Log", tabName = "Auto Refresh Execution Log", icon = icon("dna")),
+                                   menuSubItem("L1 Oncall", tabName = "L1 Oncall", icon = icon("calendar-alt")),
+                                   menuSubItem("TET Oncall", tabName = "TET Oncall", icon = icon("calendar-alt")),
+                                   menuSubItem("SME Oncall", tabName = "SME Oncall", icon = icon("calendar-alt")),
+                                   menuSubItem("AT&T Oncall", tabName = "AT&T Oncall", icon = icon("calendar-alt"))
+                                   ),
+                            menuItem("OpsCare Clients", tabName = "OpsCare Clients", icon = icon("bar-chart-o"), startExpanded = FALSE,
+                                   menuSubItem("All Cases", tabName = "All Cases", icon = icon("bezier-curve")),
+                                   menuSubItem("All Alerts", tabName = "All Alerts", icon = icon("bezier-curve")),
+                                   menuSubItem("TTR Metrics by Customer", tabName = "TTR Metrics by Customer", icon = icon("bezier-curve"))
+                                   ),
+                            menuItem("Top 10 Clients", tabName = "Top 10 Clients", icon = icon("bar-chart-o"), startExpanded = FALSE,
+                                   menuSubItem("Adobe Systems", tabName = "Adobe Systems", icon = icon("address-card")),
+                                   menuSubItem("Apple Inc", tabName = "Apple Inc", icon = icon("address-card")),
+                                   menuSubItem("AT&T Inc", tabName = "AT&T Inc", icon = icon("address-card")),
+                                   menuSubItem("Cox Communications", tabName = "Cox Communications", icon = icon("address-card")),
+                                   menuSubItem("Edge Gravity by Ericsson", tabName = "Edge Gravity by Ericsson", icon = icon("address-card")),
+                                   menuSubItem("Ericsson - Mediakind", tabName = "Ericsson - Mediakind", icon = icon("address-card")),
+                                   menuSubItem("Ericcson Telefonaka", tabName = "Ericcson Telefonaka", icon = icon("address-card")),
+                                   menuSubItem("Inspur", tabName = "Inspur", icon = icon("address-card")),
+                                   menuSubItem("Reliance", tabName = "Reliance", icon = icon("address-card")),
+                                   menuSubItem("Shanghai Xietong (Sharetome)", tabName = "Shanghai Xietong (Sharetome)", icon = icon("address-card")),
+                                   menuSubItem("State Street Corporation", tabName = "State Street Corporation", icon = icon("address-card")),
+                                   menuSubItem("Volkswaggen", tabName = "Volkswaggen", icon = icon("address-card")),
+                                   menuSubItem("Other Clients", tabName = "Other Clients", icon = icon("address-card"))
+                            ),
+                            menuItem("ProdCare Clients", tabName = "ProdCare Clients", icon = icon("bar-chart-o")),
+                            menuItem("Alerts", tabName = "Alerts", icon = icon("bar-chart-o")),
+                            menuItem("Change Requests", tabName = "Change Requests", icon = icon("list-alt")),
+                            menuItem("Maintenance Windows", tabName = "Maintenance Windows", icon = icon("list-alt")),
+                            menuItem("Rundeck", icon = icon("code"), 
                                    href = "https://rundeck.suplab01.snv.mirantis.net/user/login"),
-                          menuItem("Salesforce", icon = icon("database"), 
+                            menuItem("Salesforce", icon = icon("database"), 
                                    href = "https://mirantis.my.salesforce.com/"),
-                          menuItem("Handovers", icon = icon("google"), 
+                            menuItem("Handovers", icon = icon("google"), 
                                    href = "https://docs.google.com/spreadsheets/d/1Wu8gJyzw6o7BS4GoR7pM_NofHyXvOzDMK3O-VVHcB8c/edit#gid=0"),
-                          menuItem("Jump-Host Access", tabName = "Jump-Host Access", icon = icon("bars")),
-                          menuItem("Mirantis HT Wiki", icon = icon("bars"), 
+                            menuItem("Jump-Host Access", tabName = "Jump-Host Access", icon = icon("bars")),
+                            menuItem("Mirantis HT Wiki", icon = icon("bars"), 
                                    href = "https://mirantis.jira.com/wiki/spaces/2S/pages/1254621239/L1+-+General+Queue+Help+Desk+Team"),
-                          menuItem("Slack", icon = icon("slack"), href = "https://miracloud.slack.com"),
-                          menuItem("Source code", icon = icon("github"), 
+                            menuItem("Slack", icon = icon("slack"), href = "https://miracloud.slack.com"),
+                            menuItem("Users", tabName = "Users", icon = icon("users")),
+                            menuItem("Source code", icon = icon("github"), 
                                    href = "https://github.com/Richard-Barrett/Miradashboard")
-                        )
-                      )
-                    ),
+                            )
+                          )
+                        ),
                     dashboardBody(
+                      googleChartsInit(),
                       # Boxes need to be put in a row (or column)
                       fluidRow(
                         #box(plotOutput("plot1", height = 250)),
@@ -145,20 +205,21 @@ ui <- dashboardPage(skin = "red",
                         #    "This is the content"
                         #  )
                         #),
-                        
+                        box(plotOutput("plot1", height = 250)),
                         box(plotOutput("plot2", height = 250)),
                         #box(dataTableOutput("DT1", height = 250))
                         box(
                           title = "Controls",
-                          sliderInput("slider", "Number of observations:", 1, 100, 50)
+                          sliderInput("slider", "Number of observations:", 2, 200, 50)
                         )
                       )
                     )
-)
+                  )
 
 server <- function(input, output) {
   set.seed(122)
   histdata <- rnorm(500)
+  
   
   output$mytable = DT::renderDataTable({
     df <- gs_read(handover)
@@ -188,7 +249,7 @@ server <- function(input, output) {
     data <- histdata[seq_len(input$slider)]
     hist(data)
   })
-
+  
 }
 
 shinyApp(ui, server)
