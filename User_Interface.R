@@ -8,18 +8,43 @@
 #
 
 ## app.R ##
-library(shinydashboardPlus)
-library(shinydashboard)
-library(shiny)
-library(rsconnect)
-library(googlesheets)
-library(RCurl)
-library(httr)
-library(dplyr)
-library(mosaic)
-library(DT)
-library(googleCharts)
-library(fontawesome)
+library(shinydashboardPlus)           ## Library for Shinydashboardplus 
+library(shinydashboard)               ## Library for Shinydashboard
+library(shiny)                        ## Library for Shiny
+library(rsconnect)                    ## Libraryfor Shinny Rsconnect or publish to shinyapps.io
+library(RCurl)                        ## 
+library(httr)                         ##
+library(dplyr)                        ##
+library(mosaic)                       ##
+library(DT)                           ## Library to manipulate and rendeer Data Tables
+library(googleCharts)                 ## Library to Manipulate Google Charts that have been published
+library(googlesheets)                 ## Library to maniupalte Google Sheets owned by the user and/or organization
+library(fontawesome)                  ## Library for the icons used within the menuItems
+
+
+## Google Authenticaton
+## ---------------------------- google-authentication ------------------------------- ##
+## Notes:
+## To use google authentication to get into the applicaiton and user interface
+## You will need to uncomment out the 1,2, and 3.
+library(googleAuthR)
+library(googleAnalyticsR)
+library(searchConsoleR)
+
+# 1. Start with google analytics auth
+#gar_auth("ga.httr-oauth")
+
+# 2. You can run Google Analytics API calls:
+#ga_account_list()
+
+# 3. You can switch to Seacrh Console auth
+#gar_auth("sc.httr-oauth")
+
+# can now run Search Console API calls:
+#list_websites()
+## ---------------------------- END-google-authentication --------------------------- ##
+
+## Other authetications to come and be developed soon
 
 Logged <- FALSE;
 LoginPass <- 0; #0: not attempted, -1: failed, 1: passed
@@ -61,7 +86,8 @@ str(for_gs_sheet)
 #shinyApp(ui = ui, server = server, options = list(height = 1080))
 
 ui <- dashboardPage(skin = "red",
-                    dashboardHeader(title = "Miradashboard",
+                    dashboardHeader(title = "Miradashboard", 
+                                    
                                     # This drop-down menu offers user and system administration within the application
                                     dropdownMenu(type = "messages",
                                                  messageItem(
@@ -118,12 +144,15 @@ ui <- dashboardPage(skin = "red",
                     ),
                     
                     dashboardSidebar(
-                      ## Sidebar content
+## --------------------------------------------- Sidebar content ------------------------------------------------------##
                       dashboardSidebar(
                         sidebarMenu(
+                          # Built with Shiny by RStudio
                           sidebarSearchForm(textId = "searchText", buttonId = "searchButton",
                                             label = "Search..."),
-                            menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
+                            menuItem("Dashboard", 
+                                     tabName = "dashboard", 
+                                     icon = icon("dashboard")),
                             menuItem("Data", icon = icon("th"), href = "https://docs.google.com/spreadsheets/d/1ga7s1vgMhYRNvr2WL6vjv_VRYtP5nI0aMoweLAjB6v4/edit#gid=1342420852"),
                             menuItem("Widgets", icon = icon("th"), href = "https://shiny.rstudio.com/gallery/", newtab = FALSE),
                             menuItem("Mirantis Directory", icon = icon("sitemap") ,href = "https://directory.mirantis.com/#/resources/staffing"),
@@ -140,12 +169,12 @@ ui <- dashboardPage(skin = "red",
                                    menuSubItem("SME Oncall", tabName = "SME Oncall", icon = icon("calendar-alt")),
                                    menuSubItem("AT&T Oncall", tabName = "AT&T Oncall", icon = icon("calendar-alt"))
                                    ),
-                            menuItem("OpsCare Clients", tabName = "OpsCare Clients", icon = icon("bar-chart-o"), startExpanded = FALSE,
+                            menuItem("OpsCare Clients", id = "Opscare", tabName = "OpsCare Clients", icon = icon("bar-chart-o"), startExpanded = FALSE,
                                    menuSubItem("All Cases", tabName = "All Cases", icon = icon("bezier-curve")),
                                    menuSubItem("All Alerts", tabName = "All Alerts", icon = icon("bezier-curve")),
                                    menuSubItem("TTR Metrics by Customer", tabName = "TTR Metrics by Customer", icon = icon("bezier-curve"))
                                    ),
-                            menuItem("Top 10 Clients", tabName = "Top 10 Clients", icon = icon("bar-chart-o"), startExpanded = FALSE,
+                            menuItem("Top 10 Clients", id = "top_10_clients", tabName = "Top 10 Clients", icon = icon("bar-chart-o"), startExpanded = FALSE,
                                    menuSubItem("Adobe Systems", tabName = "Adobe Systems", icon = icon("address-card")),
                                    menuSubItem("Apple Inc", tabName = "Apple Inc", icon = icon("address-card")),
                                    menuSubItem("AT&T Inc", tabName = "AT&T Inc", icon = icon("address-card")),
@@ -160,10 +189,10 @@ ui <- dashboardPage(skin = "red",
                                    menuSubItem("Volkswaggen", tabName = "Volkswaggen", icon = icon("address-card")),
                                    menuSubItem("Other Clients", tabName = "Other Clients", icon = icon("address-card"))
                             ),
-                            menuItem("ProdCare Clients", tabName = "ProdCare Clients", icon = icon("bar-chart-o")),
-                            menuItem("Alerts", tabName = "Alerts", icon = icon("bar-chart-o")),
-                            menuItem("Change Requests", tabName = "Change Requests", icon = icon("list-alt")),
-                            menuItem("Maintenance Windows", tabName = "Maintenance Windows", icon = icon("list-alt")),
+                            menuItem("ProdCare Clients", id = "Prodcare", tabName = "ProdCare Clients", icon = icon("bar-chart-o")),
+                            menuItem("Alerts", id = "alerts", tabName = "Alerts", icon = icon("bar-chart-o")),
+                            menuItem("Change Requests", id = "change_requests", tabName = "Change Requests", icon = icon("list-alt")),
+                            menuItem("Maintenance Windows", id = "maintenance_windows", tabName = "Maintenance Windows", icon = icon("list-alt")),
                             menuItem("Rundeck", icon = icon("code"), 
                                    href = "https://rundeck.suplab01.snv.mirantis.net/user/login"),
                             menuItem("Salesforce", icon = icon("database"), 
@@ -180,46 +209,125 @@ ui <- dashboardPage(skin = "red",
                             )
                           )
                         ),
+                    
+## --------------------------------------------- Body content ------------------------------------------------------##
+
                     dashboardBody(
                       googleChartsInit(),
                       # Boxes need to be put in a row (or column)
-                      fluidRow(
-                        #box(plotOutput("plot1", height = 250)),
-                        #box(plotOutput("plot2", height = 250)),
-                        #box(plotOutput("plot3", height = 250)),
-                        #box(plotOutput("plot4", height = 250)),
-                        h1("Handovers"),
-                        DT::dataTableOutput("mytable", width = "auto", height = "auto"),
-                        #box(plotOutput("plot1", height = 250)),
-                        #box(gs_read(ss, ws = "handover")),
-                        #box(plotOutput("plot3", height = 250)),
-                        #box(plotOutput("plot4", height = 250)),
-                        
-                        #Example Attachment Box 
-                        #box(
-                        #  title = "Attachment example",
-                        #  attachmentBlock(
-                        #    src = "http://kiev.carpediem.cd/data/afisha/o/2d/c7/2dc7670333.jpg",
-                        #    title = "Test",
-                        #    title_url = "http://google.com",
-                        #    "This is the content"
-                        #  )
-                        #),
-                        box(plotOutput("plot1", height = 250)),
-                        box(plotOutput("plot2", height = 250)),
-                        #box(dataTableOutput("DT1", height = 250))
-                        box(
-                          title = "Controls",
-                          sliderInput("slider", "Number of observations:", 2, 200, 50)
+                      # Main panel for displaying outputs ----
+                      # mainPanel(
+                      tabItems(
+                        tabItem(tabName = "dashboard",
+                                h5("Dashboard Tab Content"),
+                                fluidRow(
+                                  #box(plotOutput("plot1", height = 250)),
+                                  #box(plotOutput("plot2", height = 250)),
+                                  #box(plotOutput("plot3", height = 250)),
+                                  #box(plotOutput("plot4", height = 250)),
+                                  h1("Handovers"),
+                                  DT::dataTableOutput("mytable", width = "auto", height = "auto"),
+                                  #box(plotOutput("plot1", height = 250)),
+                                  #box(gs_read(ss, ws = "handover")),
+                                  #box(plotOutput("plot3", height = 250)),
+                                  #box(plotOutput("plot4", height = 250)),
+                                  
+                                  #Example Attachment Box 
+                                  #box(
+                                  #  title = "Attachment example",
+                                  #  attachmentBlock(
+                                  #    src = "http://kiev.carpediem.cd/data/afisha/o/2d/c7/2dc7670333.jpg",
+                                  #    title = "Test",
+                                  #    title_url = "http://google.com",
+                                  #    "This is the content"
+                                  #  )
+                                  #),
+                                  box(
+                                    title = "Weekly Overall TTR", background = "red", solidHeader = TRUE,
+                                    plotOutput("plot1", height = 350)),
+                                  box(
+                                    title = "Overall CR & MW Status", background = "red", solidHeader = TRUE,
+                                    plotOutput("plot2", height = 350)),
+                                  #box(dataTableOutput("DT1", height = 250))
+                                  box(
+                                    title = "Controls",
+                                    sliderInput("slider", "Cases over Time:", 2, 200, 50)
+                                  ), 
+                                  infoBox("Sev3-4 Progress", 10 * 2, 
+                                          icon = icon("hashtag"), 
+                                          color = "red",
+                                          width = 3,
+                                          fill = TRUE),
+                                  infoBox("Average TTR", 10 * 2,
+                                          icon = icon("percent"),
+                                          color = "red",
+                                          width = 3,
+                                          fill = TRUE)
+                                  
+                                  #infoBoxOutput("progressBox2"),
+                                  #infoBoxOutput("approvalBox2")
+                                  #box(
+                                  #  title = "Histogram", background = "red", solidHeader = TRUE,
+                                  #  plotOutput("plot4", height = 150)
+                                  #)
+                                  
+                                )
+                                
+                        ),
+                        tabItem(tabName = "OpsCare Clients"),
+                        tabItem(tabName = "ProdCare Clients",
+                                h2("Dashboard Tab Content")
+                        ),
+                        tabItem(tabName = "Alerts",
+                                h2("Dashboard Tab Content")
+                        ),
+                        tabItem(tabName = "Change Requests",
+                                h2("Dashboard Tab Content")
+                        ),
+                        tabItem(tabName = "Maintenance Windows",
+                                h2("Dashboard Tab Content")
+                        ),
+                        tabItem(tabName = "Jump-Host Access",
+                                h2("Dashboard Tab Content")
+                        ),
+                        tabItem(tabName = "Users",
+                                h2("Dashboard Tab Content")
                         )
-                      )
+                        
+                      ),
+                      
+                      fluidRow(
+                        tabBox(
+                          title = "First tabBox",
+                          # The id lets us use input$tabset1 on the server to find the current tab
+                          id = "tabset1", height = "250px",
+                          tabPanel("Tab1", "First Tab Content 1"),
+                          tabPanel("Tab2", "First Tab Content 2")
+                        ),
+                        tabBox(
+                          title = "Second tabBox",
+                          side = "right", height = "250px",
+                          selected = "Tab3",
+                          tabPanel("Tab1", "Second Tab Content 1"),
+                          tabPanel("Tab2", "Second Tab content 2"),
+                          tabPanel("Tab3", "Note that when side=right, the tab order is reversed.")
+                        )
+                      ),
+                      br(),
+                      h5("Built with",
+                         img(src = "https://www.rstudio.com/wp-content/uploads/2014/04/shiny.png", height = "30px"),
+                         "by",
+                         img(src = "https://www.rstudio.com/wp-content/uploads/2014/07/RStudio-Logo-Blue-Gray.png", height = "30px"),
+                         "!"),
+                      br()
                     )
                   )
+
+## --------------------------------------------- Sever content ------------------------------------------------------##
 
 server <- function(input, output) {
   set.seed(122)
   histdata <- rnorm(500)
-  
   
   output$mytable = DT::renderDataTable({
     df <- gs_read(handover)
