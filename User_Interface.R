@@ -12,14 +12,16 @@ library(shinydashboardPlus)           ## Library for Shinydashboardplus
 library(shinydashboard)               ## Library for Shinydashboard
 library(shiny)                        ## Library for Shiny
 library(rsconnect)                    ## Libraryfor Shinny Rsconnect or publish to shinyapps.io
-library(RCurl)                        ## 
+library(RCurl)                        ##
 library(httr)                         ##
 library(dplyr)                        ##
 library(mosaic)                       ##
 library(DT)                           ## Library to manipulate and rendeer Data Tables
 library(googleCharts)                 ## Library to Manipulate Google Charts that have been published
 library(googlesheets)                 ## Library to maniupalte Google Sheets owned by the user and/or organization
+library(googleVis)                    ##
 library(fontawesome)                  ## Library for the icons used within the menuItems
+
 
 
 ## Google Authenticaton
@@ -62,23 +64,67 @@ loginfail <- box(title = "Login",textInput("userName", "Username"),
 # Google Sheets for Synced Keys with Data Master
 gs_auth(new_user = FALSE)
 handover <- gs_key("1Wu8gJyzw6o7BS4GoR7pM_NofHyXvOzDMK3O-VVHcB8c")
-#cr_mw_data <- gs_key("Insert_Key")
+cr_mw_data <- gs_key("1zkGdbsmvSDdSGX9lQaNXd230gxLAVi-LUXTX1RGDA7o")
 sev3_sev4_data <- gs_key("1ga7s1vgMhYRNvr2WL6vjv_VRYtP5nI0aMoweLAjB6v4")
 #all_alerts_data <- gs_key("Insert_Key")
-#case_wo_key_5 <- gs_key("Insert_Key")
+cases_wo_key_5 <- gs_key("1BmCvll1cmp0chaBvZoz3Nwd4Yw-ObhHf7PvsvxOlnV8")
 #sc_sev_1_cases <- gs_key("Insert_Key")
 #subscriptios <- gs_key("Insert_Key")
 bimonthly_ttr <- gs_key("1TiQeStsuwATHWxExV_Pdb2rSuOlOPB3KcYbPKFOj8VQ")
+vw_ttr <- gs_key("1ysF3sgmFiEbZiiV3RXji8KyHmCfqSsAokFzg34xUT7o")
+inspur <- gs_key("1VX5bih8KC51A0PLkOTinOzraes0PU3x8omDRvHJRtpY")
+adobe <- gs_key("1XIaubw7hzquk1CJkum_LJbjq9ZJM14N4FEhOEVCeGdg")
+apple <- gs_key("1fboC1GmhUtFEI3INFQhRbTNcA1lPtHHBGqK0Tpq74KE")
+att <- gs_key("1xIG-dsadYyjvhr-7E0L2a76F1__61iqPI0F_gYYpTGk")
+cox_com <- gs_key("1pAdvwhN3fkS9BIRXNpHhHfuxp5POtjqMWBR3Wvf3kgM")
+#edgegravity <- gs_key("Insert_Key")
+ericmediakind <- gs_key("1N-8I_kzPp8h6W0W3FE230p0Gr2bDjUctb3HWhxy6Aio")
+#erictelefonaka <- gs_key("Insert_Key")
+reliance <- gs_key("1YqCBF9R-RbP2obCdB6DoPvWnfsSe2eOfNBc9ElzgAE4")
+#sharetome <- gs_key("Insert_Key")
+#statestreet <- gs_key("Insert_Key")
 
 
+# Create Customer Data frames from Google Sheets
+## ---------------------- Customer-Dataframes ----------------------- ##
 for_gs_sheet <- gs_read(handover)
 str(for_gs_sheet)
 
-for_gs_sheet <- gs_read(sev3_sev4_data)
-str(for_gs_sheet)
+for_gs_sheet_1 <- gs_read(sev3_sev4_data)
+str(for_gs_sheet_1)
 
-for_gs_sheet <- gs_read(bimonthly_ttr)
-str(for_gs_sheet)
+for_gs_sheet_2 <- gs_read(bimonthly_ttr)
+str(for_gs_sheet_2)
+
+for_gs_sheet_vw <- gs_read(vw_ttr)
+str(for_gs_sheet_vw)
+
+for_gs_sheet_reliance <- gs_read(reliance)
+str(for_gs_sheet_reliance)
+
+for_gs_sheet_inspur <- gs_read(inspur)
+str(for_gs_sheet_inspur)
+
+for_gs_sheet_cox <- gs_read(cox_com)
+str(for_gs_sheet_cox)
+
+for_gs_sheet_mediakind <-gs_read(ericmediakind)
+str(for_gs_sheet_mediakind)
+
+for_gs_sheet_adobe <- gs_read(adobe)
+str(for_gs_sheet_adobe)
+
+for_gs_sheet_apple <- gs_read(apple)
+str(for_gs_sheet_apple)
+
+for_gs_sheet_att <- gs_read(att)
+str(for_gs_sheet_att)
+
+## ---------------------- End-Customer-Dataframes ----------------------- ##
+
+## Basic Frames for common reports
+for_gs_sheet_cases_wo_key_5 <- gs_read(cases_wo_key_5)
+str(cases_wo_key_5)
 
 ## Identifies the Google Sheet in Question
 ## handover_sheet = gs_url("https://docs.google.com/spreadsheets/d/1Wu8gJyzw6o7BS4GoR7pM_NofHyXvOzDMK3O-VVHcB8c/edit#gid=0")
@@ -142,9 +188,10 @@ ui <- dashboardPage(skin = "red",
                                                  )
                                     )
                     ),
+                    ## --------------------------------------------- Sidebar content ------------------------------------------------------##
                     
                     dashboardSidebar(
-## --------------------------------------------- Sidebar content ------------------------------------------------------##
+                      ## Sidebar content
                       dashboardSidebar(
                         sidebarMenu(
                           # Built with Shiny by RStudio
@@ -170,29 +217,29 @@ ui <- dashboardPage(skin = "red",
                                    menuSubItem("AT&T Oncall", tabName = "AT&T Oncall", icon = icon("calendar-alt"))
                                    ),
                             menuItem("OpsCare Clients", id = "Opscare", tabName = "OpsCare Clients", icon = icon("bar-chart-o"), startExpanded = FALSE,
-                                   menuSubItem("All Cases", tabName = "All Cases", icon = icon("bezier-curve")),
-                                   menuSubItem("All Alerts", tabName = "All Alerts", icon = icon("bezier-curve")),
-                                   menuSubItem("TTR Metrics by Customer", tabName = "TTR Metrics by Customer", icon = icon("bezier-curve"))
+                                   menuSubItem("All Cases", tabName = "All_Cases", icon = icon("bezier-curve")),
+                                   menuSubItem("All Alerts", tabName = "All_Alerts", icon = icon("bezier-curve")),
+                                   menuSubItem("TTR Metrics by Customer", tabName = "TTR_Metrics", icon = icon("bezier-curve"))
                                    ),
                             menuItem("Top 10 Clients", id = "top_10_clients", tabName = "Top 10 Clients", icon = icon("bar-chart-o"), startExpanded = FALSE,
-                                   menuSubItem("Adobe Systems", tabName = "Adobe Systems", icon = icon("address-card")),
-                                   menuSubItem("Apple Inc", tabName = "Apple Inc", icon = icon("address-card")),
-                                   menuSubItem("AT&T Inc", tabName = "AT&T Inc", icon = icon("address-card")),
-                                   menuSubItem("Cox Communications", tabName = "Cox Communications", icon = icon("address-card")),
-                                   menuSubItem("Edge Gravity by Ericsson", tabName = "Edge Gravity by Ericsson", icon = icon("address-card")),
-                                   menuSubItem("Ericsson - Mediakind", tabName = "Ericsson - Mediakind", icon = icon("address-card")),
-                                   menuSubItem("Ericcson Telefonaka", tabName = "Ericcson Telefonaka", icon = icon("address-card")),
+                                   menuSubItem("Adobe Systems", tabName = "Adobe_Systems", icon = icon("address-card")),
+                                   menuSubItem("Apple Inc", tabName = "Apple_Inc", icon = icon("address-card")),
+                                   menuSubItem("AT&T Inc", tabName = "ATT_Inc", icon = icon("address-card")),
+                                   menuSubItem("Cox Communications", tabName = "Cox_Communications", icon = icon("address-card")),
+                                   menuSubItem("Edge Gravity by Ericsson", tabName = "Edge_Gravity", icon = icon("address-card")),
+                                   menuSubItem("Ericsson - Mediakind", tabName = "Ericsson_Mediakind", icon = icon("address-card")),
+                                   menuSubItem("Ericcson Telefonaka", tabName = "Ericcson_Telefonaka", icon = icon("address-card")),
                                    menuSubItem("Inspur", tabName = "Inspur", icon = icon("address-card")),
                                    menuSubItem("Reliance", tabName = "Reliance", icon = icon("address-card")),
-                                   menuSubItem("Shanghai Xietong (Sharetome)", tabName = "Shanghai Xietong (Sharetome)", icon = icon("address-card")),
-                                   menuSubItem("State Street Corporation", tabName = "State Street Corporation", icon = icon("address-card")),
+                                   menuSubItem("Shanghai Xietong (Sharetome)", tabName = "Sharetome", icon = icon("address-card")),
+                                   menuSubItem("State Street Corporation", tabName = "State_Street_Corporation", icon = icon("address-card")),
                                    menuSubItem("Volkswaggen", tabName = "Volkswaggen", icon = icon("address-card")),
-                                   menuSubItem("Other Clients", tabName = "Other Clients", icon = icon("address-card"))
+                                   menuSubItem("Add/Delete Clients", tabName = "Add_Clients", icon = icon("plus"))
                             ),
-                            menuItem("ProdCare Clients", id = "Prodcare", tabName = "ProdCare Clients", icon = icon("bar-chart-o")),
-                            menuItem("Alerts", id = "alerts", tabName = "Alerts", icon = icon("bar-chart-o")),
-                            menuItem("Change Requests", id = "change_requests", tabName = "Change Requests", icon = icon("list-alt")),
-                            menuItem("Maintenance Windows", id = "maintenance_windows", tabName = "Maintenance Windows", icon = icon("list-alt")),
+                            menuItem("ProdCare Clients", tabName = "ProdCare_Clients", icon = icon("bar-chart-o")),
+                            menuItem("Alerts", tabName = "Alerts", icon = icon("bar-chart-o")),
+                            menuItem("Change Requests", tabName = "Change_Requests", icon = icon("list-alt")),
+                            menuItem("Maintenance Windows", tabName = "Maintenance_Windows", icon = icon("list-alt")),
                             menuItem("Rundeck", icon = icon("code"), 
                                    href = "https://rundeck.suplab01.snv.mirantis.net/user/login"),
                             menuItem("Salesforce", icon = icon("database"), 
@@ -210,8 +257,8 @@ ui <- dashboardPage(skin = "red",
                           )
                         ),
                     
-## --------------------------------------------- Body content ------------------------------------------------------##
-
+                    ## --------------------------------------------- Body content ------------------------------------------------------##
+                    
                     dashboardBody(
                       googleChartsInit(),
                       # Boxes need to be put in a row (or column)
@@ -274,43 +321,136 @@ ui <- dashboardPage(skin = "red",
                                 )
                                 
                         ),
-                        tabItem(tabName = "OpsCare Clients"),
-                        tabItem(tabName = "ProdCare Clients",
-                                h2("Dashboard Tab Content")
+                        tabItem(tabName = "OpsCare_Clients",
+                                h2("Insert Opscare Client Lists")
+                                ),
+                        tabItem(tabName = "ProdCare_Clients",
+                                h2("Prodcare Tab Content")
                         ),
                         tabItem(tabName = "Alerts",
-                                h2("Dashboard Tab Content")
+                                h2("Alerts Tab Content")
                         ),
-                        tabItem(tabName = "Change Requests",
-                                h2("Dashboard Tab Content")
+                        tabItem(tabName = "Change_Requests",
+                                h2("Change Requests Tab Content")
                         ),
-                        tabItem(tabName = "Maintenance Windows",
-                                h2("Dashboard Tab Content")
+                        ## ------------ OpsCare Clients ---------------- ##
+                        tabItem(tabName = "All_Cases",
+                                h1("Insert All_Cases Google Sheet")
+                                ),
+                        tabItem(tabName = "All_Alerts",
+                                h1("Insert All_Alerts Google Sheet")
+                        ),
+                        tabItem(tabName = "TTR_Metrics",
+                                h1("The TTR_Metrics Google Sheet"),
+                                fluidRow(
+                                  DT::dataTableOutput("mytable10", width = "auto", height = "auto")
+                                )
+                        ),
+                        ## ------------ Top 10 Clients ---------------- ##
+                        tabItem(tabName = "Adobe_Systems",
+                                h1("The Adobe Google Sheet"),
+                                fluidRow(
+                                  DT::dataTableOutput("mytable8", width = "auto", height = "auto")
+                                )
+                        ),
+                        tabItem(tabName = "Apple_Inc",
+                                h1("The Apple Google Sheet"),
+                                fluidRow(
+                                  DT::dataTableOutput("mytable7", width = "auto", height = "auto")
+                                )
+                        ),
+                        tabItem(tabName = "ATT_Inc",
+                                h1("The AT&T Google Sheet"),
+                                fluidRow(
+                                  DT::dataTableOutput("mytable9", width = "auto", height = "auto")
+                                )
+                        ),
+                        tabItem(tabName = "Cox_Communications",
+                                h1("The Cox Google Sheet"),
+                                fluidRow(
+                                  DT::dataTableOutput("mytable5", width = "auto", height = "auto")
+                                )
+                        ),
+                        tabItem(tabName = "Ericsson_Mediakind",
+                                h1("The Mediakind Google Sheet"),
+                                fluidRow(
+                                  DT::dataTableOutput("mytable6", width = "auto", height = "auto")
+                                )
+                        ),
+                        tabItem(tabName = "Ericcson_Telefonaka",
+                                h1("Insert The Ericcson_Telefonaka Google Sheet")
+                        ),
+                        tabItem(tabName = "Edge_Gravity",
+                                h1("CLIENT IS NOT YET ONBOARDED")
+                        ),
+                        tabItem(tabName = "Inspur",
+                                h1("The Inspur Google Sheet"),
+                                fluidRow(
+                                  DT::dataTableOutput("mytable4", width = "auto", height = "auto")
+                                )
+                        ),
+                        tabItem(tabName = "Reliance",
+                                h1("The Reliance Google Sheet"),
+                                fluidRow(
+                                  DT::dataTableOutput("mytable3", width = "auto", height = "auto")
+                                )
+                        ),
+                        tabItem(tabName = "Sharetome",
+                                h1("CLIENT IS NOT YET ONBOARDED")
+                        ),
+                        tabItem(tabName = "State_Street_Corporation",
+                                h1("CLIENT IS NOT YET ONBOARDED")
+                        ),
+                        tabItem(tabName = "Volkswaggen",
+                                h1("The VW Google Sheet"),
+                                fluidRow(
+                                  DT::dataTableOutput("mytable2", width = "auto", height = "auto")
+                                )
+                                ),
+                        tabItem(tabName = "Maintenance_Windows",
+                                h2("Maintenance Windows Tab Content"),
+                                fluidRow(
+                                  DT::dataTableOutput("mytable1", width = "auto", height = "auto")
+                                )
                         ),
                         tabItem(tabName = "Jump-Host Access",
-                                h2("Dashboard Tab Content")
+                                h2("Jump-Host Access Tab Content")
                         ),
                         tabItem(tabName = "Users",
-                                h2("Dashboard Tab Content")
+                                h2("Users Tab Content"),
+                                fluidRow(                        
+                                  tabBox(
+                                  title = "Admin/User Panel", 
+                                  # The id lets us use input$tabset1 on the server to find the current tab
+                                  id = "tabset3", height = "500px", width = "750px",
+                                  tabPanel("Admins", "First Tab Content 1"),
+                                  tabPanel("Users", "First Tab Content 2")
+                                ))
+                                
                         )
                         
                       ),
                       
                       fluidRow(
                         tabBox(
-                          title = "First tabBox",
+                          title = "Visualization Trends",
                           # The id lets us use input$tabset1 on the server to find the current tab
-                          id = "tabset1", height = "250px",
-                          tabPanel("Tab1", "First Tab Content 1"),
-                          tabPanel("Tab2", "First Tab Content 2")
+                          id = "tabset1", height = "500px",
+                          tabPanel("First Response", "First Tab Content 1"),
+                          tabPanel("Case Closure", "First Tab Content 2"),
+                          tabPanel("SLA Met", "First Tab Content 3"),
+                          tabPanel("Overall CR & MW", "Insert Google Chart")
+                          
                         ),
                         tabBox(
-                          title = "Second tabBox",
-                          side = "right", height = "250px",
+                          title = "Customer Visualizations",
+                          id = "tabset2",
+                          side = "right", height = "500px",
                           selected = "Tab3",
-                          tabPanel("Tab1", "Second Tab Content 1"),
-                          tabPanel("Tab2", "Second Tab content 2"),
-                          tabPanel("Tab3", "Note that when side=right, the tab order is reversed.")
+                          tabPanel("Volkswaggen", "Second Tab Content 1"),
+                          tabPanel("Inspur", "Second Tab content 2"),
+                          tabPanel("Reliance", "Note that when side=right, the tab order is reversed."),
+                          tabPanel("Mediakind", "Insert Google Chart as tabPanelOutput")
                         )
                       ),
                       br(),
@@ -322,16 +462,57 @@ ui <- dashboardPage(skin = "red",
                       br()
                     )
                   )
-
-## --------------------------------------------- Sever content ------------------------------------------------------##
-
+## ---------------------------------------------------------------- Server-Content -------------------------------------------------------------------- ##
 server <- function(input, output) {
   set.seed(122)
   histdata <- rnorm(500)
   
+  
+  ## Data Table Outputs from Google Sheets
+  ## --------------------------------------
   output$mytable = DT::renderDataTable({
     df <- gs_read(handover)
   })
+  
+  output$mytable1 = DT::renderDataTable({
+    df <- gs_read(sev3_sev4_data)
+  })
+  
+  output$mytable2 = DT::renderDataTable({
+    df <- gs_read(vw_ttr)
+  })
+  
+  output$mytable3 = DT::renderDataTable({
+    df <- gs_read(reliance)
+  })
+  
+  output$mytable4 = DT::renderDataTable({
+    df <- gs_read(inspur)
+  })
+  
+  output$mytable5 = DT::renderDataTable({
+    df <- gs_read(cox_com)
+  })
+  
+  output$mytable6 = DT::renderDataTable({
+    df <- gs_read(ericmediakind)
+  })
+  
+  output$mytable7 = DT::renderDataTable({
+    df <- gs_read(apple)
+  })  
+  
+  output$mytable8 = DT::renderDataTable({
+    df <- gs_read(adobe)
+  })  
+  
+  output$mytable9 = DT::renderDataTable({
+    df <- gs_read(att)
+  })  
+  
+  output$mytable10 = DT::renderDataTable({
+    df <- gs_read(cases_wo_key_5)
+  })  
   
   # List Server Output whereby plot[1-#] is the plot box output in UI above.
   # Server Output occurs and is defined by data variables
