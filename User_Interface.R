@@ -21,8 +21,9 @@ library(googleCharts)                 ## Library to Manipulate Google Charts tha
 library(googlesheets)                 ## Library to maniupalte Google Sheets owned by the user and/or organization
 library(googleVis)                    ##
 library(fontawesome)                  ## Library for the icons used within the menuItems
-
-
+library(ggplot2)
+#library(rJava)
+library(stats)
 
 ## Google Authenticaton
 ## ---------------------------- google-authentication ------------------------------- ##
@@ -47,7 +48,7 @@ library(searchConsoleR)
 ## ---------------------------- END-google-authentication --------------------------- ##
 
 ## Other authetications to come and be developed soon
-
+## DEMO
 Logged <- FALSE;
 LoginPass <- 0; #0: not attempted, -1: failed, 1: passed
 
@@ -124,7 +125,10 @@ str(for_gs_sheet_att)
 
 ## Basic Frames for common reports
 for_gs_sheet_cases_wo_key_5 <- gs_read(cases_wo_key_5)
-str(cases_wo_key_5)
+str(for_gs_sheet_cases_wo_key_5)
+
+for_gs_bimonthly_ttr <- gs_read(bimonthly_ttr)
+str(for_gs_bimonthly_ttr)
 
 ## Identifies the Google Sheet in Question
 ## handover_sheet = gs_url("https://docs.google.com/spreadsheets/d/1Wu8gJyzw6o7BS4GoR7pM_NofHyXvOzDMK3O-VVHcB8c/edit#gid=0")
@@ -133,7 +137,9 @@ str(cases_wo_key_5)
 
 ui <- dashboardPage(skin = "red",
                     dashboardHeader(title = "Miradashboard", 
-                                    
+                                    # This drop-down menu offers user a SSO area.
+                                    # Employees will be able to gain access to all of the corporate software and there integrations in one area.
+
                                     # This drop-down menu offers user and system administration within the application
                                     dropdownMenu(type = "messages",
                                                  messageItem(
@@ -250,6 +256,7 @@ ui <- dashboardPage(skin = "red",
                             menuItem("Mirantis HT Wiki", icon = icon("bars"), 
                                    href = "https://mirantis.jira.com/wiki/spaces/2S/pages/1254621239/L1+-+General+Queue+Help+Desk+Team"),
                             menuItem("Slack", icon = icon("slack"), href = "https://miracloud.slack.com"),
+                            menuItem("Gainsight", tabName = "Gainsight", icon = icon("industry")),
                             menuItem("Users", tabName = "Users", icon = icon("users")),
                             menuItem("Source code", icon = icon("github"), 
                                    href = "https://github.com/Richard-Barrett/Miradashboard")
@@ -436,21 +443,33 @@ ui <- dashboardPage(skin = "red",
                           title = "Visualization Trends",
                           # The id lets us use input$tabset1 on the server to find the current tab
                           id = "tabset1", height = "500px",
-                          tabPanel("First Response", "First Tab Content 1"),
-                          tabPanel("Case Closure", "First Tab Content 2"),
+                          tabPanel("First Response",
+                                   HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRNxLt1g_l9p2zDStK3lrj7iLkMruOzjFOr_ZUyoc4nJtXXpkp1TRc7sB83xjGpXLcLLUq8xH0B9iv1/pubchart?oid=1201606802&amp;format=interactive"></iframe>')
+
+                                   ),
+                          tabPanel("Case Closure", 
+                                   HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRNxLt1g_l9p2zDStK3lrj7iLkMruOzjFOr_ZUyoc4nJtXXpkp1TRc7sB83xjGpXLcLLUq8xH0B9iv1/pubchart?oid=1827778814&amp;format=interactive"></iframe>')
+                                   ),
                           tabPanel("SLA Met", "First Tab Content 3"),
-                          tabPanel("Overall CR & MW", "Insert Google Chart")
+                          tabPanel("SLA Missed", "Insert SLA Misses Content"),
+                          tabPanel("Overall CR & MW", "Insert Google Chart",
+                                   HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTq8JfC-o3VDDU303mHaT49nt_FGOHikF_GqLFvBS-le9-AYmBOTGDE5TPRh_XTS_iu4rAu4xdfKUzz/pubchart?oid=1004062925&amp;format=interactive"></iframe>'))
                           
                         ),
                         tabBox(
                           title = "Customer Visualizations",
                           id = "tabset2",
                           side = "right", height = "500px",
-                          selected = "Tab3",
-                          tabPanel("Volkswaggen", "Second Tab Content 1"),
-                          tabPanel("Inspur", "Second Tab content 2"),
-                          tabPanel("Reliance", "Note that when side=right, the tab order is reversed."),
-                          tabPanel("Mediakind", "Insert Google Chart as tabPanelOutput")
+                          selected = "Mediakind",
+                          tabPanel("Volkswaggen", 
+                                   HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRQ3jyR6tDWIzwad37uzklYoi4r7Fu3--znyoomv7-GSTs4YlpOZA01emoAunbgZBz4tQzkgrvH6lyX/pubchart?oid=973576597&amp;format=interactive"></iframe>')
+                                   ),
+                          tabPanel("Inspur",
+                                   HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vSx-jOMQSCb0n_mAnK2csWiSPVDwvGsAMKmxaWP1jfSn7ThfUHr7TD3st0rFos5TvctWkPrItLzwurX/pubchart?oid=1867197075&amp;format=interactive"></iframe>')),
+                          tabPanel("Reliance",
+                                   HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQqb9QFD6FDHRTXc9Kbr09muTTfCKhXij740HJO1eyA8xLeAuX1RLpzTN_LfL1HWFe684_JUqbMPNbu/pubchart?oid=1303594187&amp;format=interactive"></iframe>')),
+                          tabPanel("Mediakind", 
+                                   HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vT2wCO76jnF6n2za5cUq_lHNqM7x8zdYOemWmxzndXDWEwCpUFfVsv-q9LkNz_VNW0JTlAPACh3hWyT/pubchart?oid=261186580&amp;format=interactive"></iframe>'))
                         )
                       ),
                       br(),
