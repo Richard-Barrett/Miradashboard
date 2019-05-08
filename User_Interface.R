@@ -8,20 +8,24 @@
 #
 
 ## app.R ##
-library(shinydashboardPlus)           ## Library for Shinydashboardplus 
-library(shinydashboard)               ## Library for Shinydashboard
-library(shiny)                        ## Library for Shiny
-library(rsconnect)                    ## Libraryfor Shinny Rsconnect or publish to shinyapps.io
-library(RCurl)                        ##
-library(httr)                         ##
-library(dplyr)                        ##
-library(mosaic)                       ##
-library(DT)                           ## Library to manipulate and rendeer Data Tables
-library(googleCharts)                 ## Library to Manipulate Google Charts that have been published
-library(googlesheets)                 ## Library to maniupalte Google Sheets owned by the user and/or organization
-library(googleVis)                    ##
-library(fontawesome)                  ## Library for the icons used within the menuItems
-library(ggplot2)
+library(shinydashboardPlus)                           ## Library for Shinydashboardplus 
+library(shinydashboard)                               ## Library for Shinydashboard
+library(shiny)                                        ## Library for Shiny
+library(rsconnect)                                    ## Libraryfor Shinny Rsconnect or publish to shinyapps.io
+library(RCurl)                                        ##
+library(httr)                                         ##
+library(dplyr)                                        ##
+library(mosaic)                                       ##
+library(DT)                                           ## Library to manipulate and rendeer Data Tables
+library(googleCharts)                                 ## Library to Manipulate Google Charts that have been published
+library(googlesheets)                                 ## Library to maniupalte Google Sheets owned by the user and/or organization
+
+# Google Vis Package and Suppression Message
+library(googleVis)                                    ##
+suppressPackageStartupMessages(library(googleVis))    ##
+#library(fontawesome)                                 ## Library for the icons used within the menuItems
+library(ggplot2)                                      ## Library for ggplot 
+library(salesforcer)                                  ## Library for Salesforce API
 #library(rJava)
 library(stats)
 
@@ -36,6 +40,7 @@ library(searchConsoleR)
 
 # 1. Start with google analytics auth
 #gar_auth("ga.httr-oauth")
+options(httr_oob_default=FALSE) 
 
 # 2. You can run Google Analytics API calls:
 #ga_account_list()
@@ -49,8 +54,8 @@ library(searchConsoleR)
 
 ## Other authetications to come and be developed soon
 ## DEMO
-Logged <- FALSE;
-LoginPass <- 0; #0: not attempted, -1: failed, 1: passed
+Logged <- TRUE;
+LoginPass <- 1; #0: not attempted, -1: failed, 1: passed
 
 login <- box(title = "Login",textInput("userName", "Username (user)"),
              passwordInput("passwd", "Password (test)"),
@@ -63,7 +68,7 @@ loginfail <- box(title = "Login",textInput("userName", "Username"),
 
 
 # Google Sheets for Synced Keys with Data Master
-gs_auth(new_user = FALSE)
+gs_auth(new_user = TRUE)
 handover <- gs_key("1Wu8gJyzw6o7BS4GoR7pM_NofHyXvOzDMK3O-VVHcB8c")
 cr_mw_data <- gs_key("1zkGdbsmvSDdSGX9lQaNXd230gxLAVi-LUXTX1RGDA7o")
 sev3_sev4_data <- gs_key("1ga7s1vgMhYRNvr2WL6vjv_VRYtP5nI0aMoweLAjB6v4")
@@ -82,6 +87,8 @@ cox_com <- gs_key("1pAdvwhN3fkS9BIRXNpHhHfuxp5POtjqMWBR3Wvf3kgM")
 ericmediakind <- gs_key("1N-8I_kzPp8h6W0W3FE230p0Gr2bDjUctb3HWhxy6Aio")
 #erictelefonaka <- gs_key("Insert_Key")
 reliance <- gs_key("1YqCBF9R-RbP2obCdB6DoPvWnfsSe2eOfNBc9ElzgAE4")
+vw_demo <- gs_key("1-721jfJGi2bjC_42TSikKrKNrDF1yefoociYo3p8lPc")
+auto_vw <- gs_key("1t-vZ0mMUVYWJ8ML_Cje4-TlxXzpRrp3akDjedH0bgeo")  ## Data for VW SLA Tracker
 #sharetome <- gs_key("Insert_Key")
 #statestreet <- gs_key("Insert_Key")
 
@@ -90,6 +97,9 @@ reliance <- gs_key("1YqCBF9R-RbP2obCdB6DoPvWnfsSe2eOfNBc9ElzgAE4")
 ## ---------------------- Customer-Dataframes ----------------------- ##
 for_gs_sheet <- gs_read(handover)
 str(for_gs_sheet)
+
+for_gs_vw_demo <- gs_read(vw_demo)
+str(for_gs_vw_demo)
 
 for_gs_sheet_1 <- gs_read(sev3_sev4_data)
 str(for_gs_sheet_1)
@@ -120,6 +130,9 @@ str(for_gs_sheet_apple)
 
 for_gs_sheet_att <- gs_read(att)
 str(for_gs_sheet_att)
+
+for_gs_sheet_autovw <- gs_read(auto_vw)
+str(for_gs_sheet_autovw)
 
 ## ---------------------- End-Customer-Dataframes ----------------------- ##
 
@@ -200,6 +213,7 @@ ui <- dashboardPage(skin = "red",
                       ## Sidebar content
                       dashboardSidebar(
                         sidebarMenu(
+                          width = 12,
                           # Built with Shiny by RStudio
                           sidebarSearchForm(textId = "searchText", buttonId = "searchButton",
                                             label = "Search..."),
@@ -411,7 +425,83 @@ ui <- dashboardPage(skin = "red",
                         tabItem(tabName = "Volkswaggen",
                                 h1("The VW Google Sheet"),
                                 fluidRow(
-                                  DT::dataTableOutput("mytable2", width = "auto", height = "auto")
+                                  tabBox(
+                                    id = "VWDT", 
+                                    tabPanel("VW Output",
+                                            DT::dataTableOutput("mytable2", width = "auto", height = "auto")
+                                            ),
+                                    tabPanel("VW DEMO",
+                                            DT::dataTableOutput("vw_demo", width = "auto", height = "auto")
+                                    ),
+                                    tabPanel("SLA VW Tracking",
+                                             DT::dataTableOutput("auto_vw", width = "100%", height = "auto")
+                                      
+                                    )
+                                  )
+                                  ),
+                                fluidRow(
+                                  tabBox(
+                                    id = "VWA", 
+                                    height = "500px",
+                                  tabPanel("Count of Cloud",
+                                           HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=787540835&amp;format=interactive"></iframe>')
+                                  ),
+                                  tabPanel("Count of Case Status",
+                                          HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=1245795997&amp;format=interactive"></iframe>')
+                                  ),
+                                  tabPanel("Count of Severity Level",
+                                          HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=28739513&amp;format=interactive"></iframe>')
+                                  ),
+                                  tabPanel("Distribution of Status",
+                                          HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=890459270&amp;format=interactive"></iframe>')
+                                  )
+                                  ),
+                                  tabBox(
+                                    id = "VWB",
+                                    height = "500px",
+                                    tabPanel("Agent Report Time",
+                                          HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=563811911&amp;format=interactive"></iframe>')
+                                    ),
+                                    tabPanel("Age vs. Mirantis Response",
+                                          HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=2086505264&amp;format=interactive"></iframe>')
+                                    ),
+                                    tabPanel("Customer && Mirantis Wait",
+                                          HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=885164913&amp;format=interactive"></iframe>')
+                                    ),
+                                    tabPanel("Case Violation over Time",
+                                      HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=88368172&amp;format=interactive"></iframe>')
+                                    )
+                                  ),
+                                  tabBox(
+                                    id = "VWC",
+                                    height = "500px",
+                                    tabPanel("Compute",
+                                             HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=1697665214&amp;format=interactive"></iframe>')
+                                             ),
+                                    tabPanel("Storage",
+                                             HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=1573719008&amp;format=interactive"></iframe>')
+                                             ),
+                                    tabPanel("Controllers",
+                                             HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=1272974501&amp;format=interactive"></iframe>')
+                                    ),
+                                    tabPanel("Count of Nodes",
+                                             HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=100650085&amp;format=interactive"></iframe>')
+                                             )
+                                  )
+                                ),
+                                fluidRow(
+                                  box(title = "Count of Actual Resolution Met", background = "red", solidHeader = TRUE, align = "center",
+                                    HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=1695935826&amp;format=interactive"></iframe>')
+                                  ),
+                                  box(title = "Count of Actual Response Met", background = "red", solidHeader = TRUE, align = "center",
+                                    HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=1680885140&amp;format=interactive"></iframe>')
+                                  ),
+                                  box(title = "Bar Count for Resolution", background = "red", solidHeader = TRUE, align = "center",
+                                    HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=543988029&amp;format=interactive"></iframe>')
+                                  ),
+                                  box(title = "Bar Count of Actual Response", background = "red", solidHeader = TRUE, align = "center",
+                                    HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=1133411936&amp;format=interactive"></iframe>')
+                                  )
                                 )
                                 ),
                         tabItem(tabName = "Maintenance_Windows",
@@ -447,7 +537,7 @@ ui <- dashboardPage(skin = "red",
                                    HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRNxLt1g_l9p2zDStK3lrj7iLkMruOzjFOr_ZUyoc4nJtXXpkp1TRc7sB83xjGpXLcLLUq8xH0B9iv1/pubchart?oid=1201606802&amp;format=interactive"></iframe>')
 
                                    ),
-                          tabPanel("Case Closure", 
+                          tabPanel("Cases w/o Key 5 Updates", 
                                    HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRNxLt1g_l9p2zDStK3lrj7iLkMruOzjFOr_ZUyoc4nJtXXpkp1TRc7sB83xjGpXLcLLUq8xH0B9iv1/pubchart?oid=1827778814&amp;format=interactive"></iframe>')
                                    ),
                           tabPanel("SLA Met", "First Tab Content 3"),
@@ -486,6 +576,46 @@ server <- function(input, output) {
   set.seed(122)
   histdata <- rnorm(500)
   
+  ## Make a button to link to Google auth screen
+  ## If auth_code is returned then don't show login button
+  output$loginButton <- renderUI({
+    if (is.null(isolate(access_token()))) {
+      tags$a("Authorize App",
+             href = gs_webapp_auth_url(),
+             class = "btn btn-default")
+    } else {
+      return()
+    }
+  })
+  
+  output$logoutButton <- renderUI({
+    if (!is.null(access_token())) {
+      # Revoke the token too? use access_token$revoke()
+      tags$a("Logout",
+             href = getOption("googlesheets.webapp.redirect_uri"),
+             class = "btn btn-default")
+    } else {
+      return()
+    }
+  })
+  
+  ## Get auth code from return URL
+  access_token  <- reactive({
+    ## gets all the parameters in the URL. The auth code should be one of them.
+    pars <- parseQueryString(session$clientData$url_search)
+    
+    if (length(pars$code) > 0) {
+      ## extract the authorization code
+      gs_webapp_get_token(auth_code = pars$code)
+    } else {
+      NULL
+    }
+  })
+  
+  gsLs <- reactive({
+    gs_ls()
+  })
+  
   
   ## Data Table Outputs from Google Sheets
   ## --------------------------------------
@@ -499,6 +629,10 @@ server <- function(input, output) {
   
   output$mytable2 = DT::renderDataTable({
     df <- gs_read(vw_ttr)
+  })
+  
+  output$vw_demo = DT::renderDataTable({
+    df <- gs_read(vw_demo)
   })
   
   output$mytable3 = DT::renderDataTable({
@@ -531,6 +665,10 @@ server <- function(input, output) {
   
   output$mytable10 = DT::renderDataTable({
     df <- gs_read(cases_wo_key_5)
+  })  
+  
+  output$auto_vw = DT::renderDataTable({
+    df <- gs_read(auto_vw)
   })  
   
   # List Server Output whereby plot[1-#] is the plot box output in UI above.
