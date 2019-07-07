@@ -1,0 +1,25 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1559845194852.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "C20555AD",
+    "lastKnownWriteTime" : 1559852208,
+    "last_content_update" : 1559852208879,
+    "path" : "~/R-Studio/CSO/CSO_Test/ui.R",
+    "project_path" : null,
+    "properties" : {
+        "cursorPosition" : "162,0",
+        "scrollLine" : "0"
+    },
+    "read_only" : false,
+    "read_only_alternatives" : [
+    ],
+    "relative_order" : 2,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

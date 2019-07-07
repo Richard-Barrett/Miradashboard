@@ -1,0 +1,44 @@
+#
+# This is the server logic of a Shiny web application. You can run the
+# application by clicking 'Run App' above.
+#
+# Find out more about building applications with Shiny here:
+#
+#    http://shiny.rstudio.com/
+#
+
+library(shiny)
+library(shinydashboard)
+library(googlesheets)
+library(googleCharts)
+library(googleAuthR)
+library(stats)
+library(searchConsoleR)
+library(googleAnalyticsR)
+library(httr)
+library(dplyr)
+library(plyr)
+library(mosaic)
+library(DT)
+library(httpuv)
+library(htmltools)
+
+# Define server logic required to draw a histogram
+shinyServer(function(input, output) {
+  google_app <- oauth_app(
+    "google",
+    key = "390198683818-i5fmprq9h09vcn6niu7v91bku2dvk1v5.apps.googleusercontent.com",
+    secret = "bDkrVewW5eRxxSpdFH6Ka5mz"
+  )
+  #oauth2.0_token(google_app)
+    ## ---------- Google Authentication ---------- ##
+    gs_auth(token = NULL ,new_user = TRUE,
+            key = getOption("390198683818-i5fmprq9h09vcn6niu7v91bku2dvk1v5.apps.googleusercontent.com"),
+            secret = getOption("bDkrVewW5eRxxSpdFH6Ka5mz"),
+            cache = getOption("googlesheets.httr_oauth_cache"), verbose = TRUE)
+
+    output$mytable = DT::renderDataTable({
+        df <- gs_read(handover)
+    #})
+
+})

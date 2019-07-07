@@ -1,0 +1,215 @@
+#
+# This is the user-interface definition of a Shiny web application. You can
+# run the application by clicking 'Run App' above.
+#
+# Find out more about building applications with Shiny here:
+#
+#    http://shiny.rstudio.com/
+#
+
+library(shiny)
+library(shinydashboard)
+library(googlesheets)
+library(httr)  
+library(dplyr)
+library(plyr)
+library(mosaic)                                       
+library(DT)  
+
+#handover <- gs_key("1Wu8gJyzw6o7BS4GoR7pM_NofHyXvOzDMK3O-VVHcB8c")
+#for_gs_sheet <- gs_read(handover)
+#str(for_gs_sheet)
+
+# Define UI for application that draws a histogram
+shinyUI(fluidPage(
+
+    ## ui.R ##
+    ## --------------------------------------------- Header Content ------------------------------------------------------##
+    
+ui <-dashboardPage(skin = "red",
+        dashboardHeader(title = "Miradashboard",
+                        # This drop-down menu offers user and system administration within the application
+                        dropdownMenu(type = "messages",
+                                     messageItem(
+                                         from = "Sales Dept",
+                                         message = "Sales are steady this month."
+                                     ),
+                                     messageItem(
+                                         from = "New User",
+                                         message = "How do I register?",
+                                         icon = icon("question"),
+                                         time = "13:45"
+                                     ),
+                                     messageItem(
+                                         from = "Support",
+                                         message = "The new server is ready.",
+                                         icon = icon("life-ring"),
+                                         time = "2014-12-01"
+                                     )
+                        ),
+                        # This is a drop-down menu for checking notifications.
+                        # This should alert users of alerts that have not been merged to a case in the last 15 days.
+                        dropdownMenu(type = "notifications",
+                                     notificationItem(
+                                         text = "5 new users today",
+                                         icon("users")
+                                     ),
+                                     notificationItem(
+                                         text = "12 items delivered",
+                                         icon("truck"),
+                                         status = "success"
+                                     ),
+                                     notificationItem(
+                                         text = "Server load at 86%",
+                                         icon = icon("exclamation-triangle"),
+                                         status = "warning"
+                                     )
+                        ),
+                        # This is a drop-down menu for checking tasks.
+                        # This drop-down menu will eventually offer suggestions based off of ML Algorithms.
+                        dropdownMenu(type = "tasks", badgeStatus = "success",
+                                     taskItem(value = 90, color = "green",
+                                              "Documentation"
+                                     ),
+                                     taskItem(value = 17, color = "aqua",
+                                              "Project X"
+                                     ),
+                                     taskItem(value = 75, color = "yellow",
+                                              "Server deployment"
+                                     ),
+                                     taskItem(value = 80, color = "red",
+                                              "Overall project"
+                                     )
+                        )
+                        ),
+        
+        ## --------------------------------------------- Sidebar Content ------------------------------------------------------##
+        
+        dashboardSidebar(
+            sidebarMenu(
+            menuItem("Dashboard", 
+                     tabName = "dashboard", 
+                     icon = icon("dashboard")),
+            menuItem("Data", icon = icon("th"), href = "https://docs.google.com/spreadsheets/d/1ga7s1vgMhYRNvr2WL6vjv_VRYtP5nI0aMoweLAjB6v4/edit#gid=1342420852"),
+            menuItem("Widgets", icon = icon("th"), href = "https://shiny.rstudio.com/gallery/", newtab = FALSE),
+            menuItem("Mirantis Directory", icon = icon("sitemap") ,href = "https://directory.mirantis.com/#/resources/staffing"),
+            menuItem("Reports", tabName = "reports", icon = icon("chart-line"), startExpanded = FALSE,
+                     menuSubItem("All Alerts", tabName = "All Alerts", icon = icon("dna")),
+                     menuSubItem("All CR & MW", tabName = "All CR & MW", icon = icon("dna")),
+                     menuSubItem("Sev3 & Sev4 Data", tabName = "Sev3 & Sev4 Data", icon = icon("dna")),
+                     menuSubItem("SC Sev1 Cases", tabName = "SC Sev1 Cases", icon = icon("dna")),
+                     menuSubItem("Cases with Key 5 Updates", tabName = "Cases with Key 5 Updates", icon = icon("dna")),
+                     menuSubItem("Cases without Key 5 Updates", tabName = "Cases without Key 5 Updates", icon = icon("dna")),
+                     menuSubItem("Auto Refresh Execution Log", tabName = "Auto Refresh Execution Log", icon = icon("dna")),
+                     menuSubItem("L1 Oncall", tabName = "L1 Oncall", icon = icon("calendar-alt")),
+                     menuSubItem("TET Oncall", tabName = "TET Oncall", icon = icon("calendar-alt")),
+                     menuSubItem("SME Oncall", tabName = "SME Oncall", icon = icon("calendar-alt")),
+                     menuSubItem("AT&T Oncall", tabName = "AT&T Oncall", icon = icon("calendar-alt"))
+            ),
+            menuItem("OpsCare Clients", id = "Opscare", tabName = "OpsCare Clients", icon = icon("bar-chart-o"), startExpanded = FALSE,
+                     menuSubItem("All Cases", tabName = "All_Cases", icon = icon("bezier-curve")),
+                     menuSubItem("All Alerts", tabName = "All_Alerts", icon = icon("bezier-curve")),
+                     menuSubItem("TTR Metrics by Customer", tabName = "TTR_Metrics", icon = icon("bezier-curve"))
+            ),
+            menuItem("Top 10 Clients", id = "top_10_clients", tabName = "Top 10 Clients", icon = icon("bar-chart-o"), startExpanded = FALSE,
+                     menuSubItem("Adobe Systems", tabName = "Adobe_Systems", icon = icon("address-card")),
+                     menuSubItem("Apple Inc", tabName = "Apple_Inc", icon = icon("address-card")),
+                     menuSubItem("AT&T Inc", tabName = "ATT_Inc", icon = icon("address-card")),
+                     menuSubItem("Cox Communications", tabName = "Cox_Communications", icon = icon("address-card")),
+                     menuSubItem("Edge Gravity by Ericsson", tabName = "Edge_Gravity", icon = icon("address-card")),
+                     menuSubItem("Ericsson - Mediakind", tabName = "Ericsson_Mediakind", icon = icon("address-card")),
+                     menuSubItem("Ericcson Telefonaka", tabName = "Ericcson_Telefonaka", icon = icon("address-card")),
+                     menuSubItem("Inspur", tabName = "Inspur", icon = icon("address-card")),
+                     menuSubItem("Reliance", tabName = "Reliance", icon = icon("address-card")),
+                     menuSubItem("Shanghai Xietong (Sharetome)", tabName = "Sharetome", icon = icon("address-card")),
+                     menuSubItem("State Street Corporation", tabName = "State_Street_Corporation", icon = icon("address-card")),
+                     menuSubItem("Volkswaggen", tabName = "Volkswaggen", icon = icon("address-card")),
+                     menuSubItem("Add/Delete Clients", tabName = "Add_Clients", icon = icon("plus"))
+            ),
+            menuItem("ProdCare Clients", tabName = "ProdCare_Clients", icon = icon("bar-chart-o")),
+            menuItem("Alerts", tabName = "Alerts", icon = icon("bar-chart-o")),
+            menuItem("Change Requests", tabName = "Change_Requests", icon = icon("list-alt")),
+            menuItem("Maintenance Windows", tabName = "Maintenance_Windows", icon = icon("list-alt")),
+            menuItem("Rundeck", icon = icon("code"), 
+                     href = "https://rundeck.suplab01.snv.mirantis.net/user/login"),
+            menuItem("Salesforce", icon = icon("database"), 
+                     href = "https://mirantis.my.salesforce.com/"),
+            menuItem("Handovers", icon = icon("google"), 
+                     href = "https://docs.google.com/spreadsheets/d/1Wu8gJyzw6o7BS4GoR7pM_NofHyXvOzDMK3O-VVHcB8c/edit#gid=0"),
+            menuItem("Jump-Host Access", tabName = "Jump-Host Access", icon = icon("bars")),
+            menuItem("Mirantis HT Wiki", icon = icon("bars"), 
+                     href = "https://mirantis.jira.com/wiki/spaces/2S/pages/1254621239/L1+-+General+Queue+Help+Desk+Team"),
+            menuItem("Slack", icon = icon("slack"), href = "https://miracloud.slack.com"),
+            menuItem("Gainsight", tabName = "Gainsight", icon = icon("industry")),
+            menuItem("Users", tabName = "Users", icon = icon("users")),
+            menuItem("Source code", icon = icon("github"), 
+                     href = "https://github.com/Richard-Barrett/Miradashboard")
+            
+            ## --------------------------------------------- Body Content ------------------------------------------------------##
+            
+            
+                     )),
+        dashboardBody(
+            tabItems(
+                tabItem(tabName = "dashboard",
+                        h5("Dashboard Tab Content"),
+                        fluidRow(
+                            #box(plotOutput("plot1", height = 250)),
+                            #box(plotOutput("plot2", height = 250)),
+                            #box(plotOutput("plot3", height = 250)),
+                            #box(plotOutput("plot4", height = 250)),
+                            h1("Handovers"),
+                            HTML('<iframe src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vQhKvFE0uh_YR3o0fAIyh7fKZ4P_cd2oH9EKGY7HU4I-QG6GvUlHN7KKdQVXzEvtjn04I7TWyDM45pD/pubhtml?widget=true&amp;headers=false"></iframe>'),
+                            #DT::dataTableOutput("mytable", width = "auto", height = "auto"),
+                            #box(plotOutput("plot1", height = 250)),
+                            #box(gs_read(ss, ws = "handover")),
+                            #box(plotOutput("plot3", height = 250)),
+                            #box(plotOutput("plot4", height = 250)),
+                            
+                            #Example Attachment Box 
+                            #box(
+                            #  title = "Attachment example",
+                            #  attachmentBlock(
+                            #    src = "http://kiev.carpediem.cd/data/afisha/o/2d/c7/2dc7670333.jpg",
+                            #    title = "Test",
+                            #    title_url = "http://google.com",
+                            #    "This is the content"
+                            #  )
+                            #),
+                            box(
+                                title = "Weekly Overall TTR", background = "red", solidHeader = TRUE,
+                                plotOutput("plot1", height = 350)),
+                            box(
+                                title = "Overall CR & MW Status", background = "red", solidHeader = TRUE,
+                                plotOutput("plot2", height = 350)),
+                            #box(dataTableOutput("DT1", height = 250))
+                            box(
+                                title = "Controls",
+                                sliderInput("slider", "Cases over Time:", 2, 200, 50)
+                            ), 
+                            infoBox("Sev3-4 Progress", 10 * 2, 
+                                    icon = icon("hashtag"), 
+                                    color = "red",
+                                    width = 3,
+                                    fill = TRUE),
+                            infoBox("Average TTR", 10 * 2,
+                                    icon = icon("percent"),
+                                    color = "red",
+                                    width = 3,
+                                    fill = TRUE)
+                            
+                            #infoBoxOutput("progressBox2"),
+                            #infoBoxOutput("approvalBox2")
+                            #box(
+                            #  title = "Histogram", background = "red", solidHeader = TRUE,
+                            #  plotOutput("plot4", height = 150)
+                            #)
+                            
+                        )
+                        
+                )
+            )
+        )
+    )
+    )
+)

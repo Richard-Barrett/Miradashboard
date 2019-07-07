@@ -1,0 +1,147 @@
+#
+# This is the user-interface definition of a Shiny web application. You can
+# run the application by clicking 'Run App' above.
+#
+# Find out more about building applications with Shiny here:
+# 
+#    http://shiny.rstudio.com/
+#
+
+## app.R ##
+library(rsconnect)
+#library(shinydashboardPlus)
+library(shinydashboard)
+#library(shiny)
+library(googleAuthR)
+library(shiny)
+library(shinyjs)
+
+#shinyApp(ui = ui, server = server, options = list(height = 1080))
+uiOutput("AuthGAURL")
+
+
+ui <- dashboardPage(skin = "red",
+  dashboardHeader(title = "Miradashboard",
+                  # This drop-down menu offers user and system administration within the application
+                  dropdownMenu(type = "messages",
+                               messageItem(
+                                 from = "Sales Dept",
+                                 message = "Sales are steady this month."
+                               ),
+                               messageItem(
+                                 from = "New User",
+                                 message = "How do I register?",
+                                 icon = icon("question"),
+                                 time = "13:45"
+                               ),
+                               messageItem(
+                                 from = "Support",
+                                 message = "The new server is ready.",
+                                 icon = icon("life-ring"),
+                                 time = "2014-12-01"
+                               )
+                  ),
+                  # This is a drop-down menu for checking notifications.
+                  # This should alert users of alerts that have not been merged to a case in the last 15 days.
+                  dropdownMenu(type = "notifications",
+                               notificationItem(
+                                 text = "5 new users today",
+                                 icon("users")
+                               ),
+                               notificationItem(
+                                 text = "12 items delivered",
+                                 icon("truck"),
+                                 status = "success"
+                               ),
+                               notificationItem(
+                                 text = "Server load at 86%",
+                                 icon = icon("exclamation-triangle"),
+                                 status = "warning"
+                               )
+                  ),
+                  # This is a drop-down menu for checking tasks.
+                  # This drop-down menu will eventually offer suggestions based off of ML Algorithms.
+                  dropdownMenu(type = "tasks", badgeStatus = "success",
+                               taskItem(value = 90, color = "green",
+                                        "Documentation"
+                               ),
+                               taskItem(value = 17, color = "aqua",
+                                        "Project X"
+                               ),
+                               taskItem(value = 75, color = "yellow",
+                                        "Server deployment"
+                               ),
+                               taskItem(value = 80, color = "red",
+                                        "Overall project"
+                               )
+                  )
+
+
+
+  ),
+  dashboardSidebar(
+    ## Sidebar content
+    dashboardSidebar(
+      sidebarMenu(
+        menuItem("Dashboard", tabName = "dashboard", icon = icon("dashboard")),
+        menuItem("Widgets", tabName = "widgets", icon = icon("th")),
+        menuItem("Reports", tabName = "reports", icon = icon("th")),
+        menuItem("OpsCare Clients", tabName = "OpsCare Clients", icon = icon("bar-chart-o")),
+        menuItem("ProdCare Clients", tabName = "ProdCare Clients", icon = icon("bar-chart-o")),
+        menuItem("Alerts", tabName = "Alerts", icon = icon("bar-chart-o")),
+        menuItem("Change Requests", tabName = "Change Requests", icon = icon("list-alt")),
+        menuItem("Maintenance Windows", tabName = "Maintenance Windows", icon = icon("list-alt")),
+        menuItem("Rundeck", tabName = "Rundeck", icon = icon("bars")),
+        menuItem("Salesforce", tabName = "Salesforce", icon = icon("bars")),
+        menuItem("Handovers", tabName = "Handovers", icon = icon("bars")),
+        menuItem("Jump-Host Access", tabName = "Jump-Host Access", icon = icon("bars"))
+      )
+    )
+  ),
+  dashboardBody(
+    # Boxes need to be put in a row (or column)
+    fluidRow(
+      box(plotOutput("plot1", height = 250)),
+      box(plotOutput("plot2", height = 250)),
+      box(plotOutput("plot3", height = 250)),
+      #box(plotOutput("plot4", height = 250)),
+      #box(dataTableOutput("DT1", height = 250)),
+      box(
+        title = "Controls",
+        sliderInput("slider", "Number of observations:", 1, 100, 50)
+      )
+    )
+  )
+)
+
+server <- function(input, output) {
+  set.seed(122)
+  histdata <- rnorm(500)
+
+  # List Server Output whereby plot[1-#] is the plot box output in UI above.
+  # Server Output occurds and is defined by data variables
+  # histdata[seq_len(input$slider)] defines slider utilization
+  # hist(data) defines histogram off of "data"te
+  output$plot1 <- renderPlot({
+    data <- histdata[seq_len(input$slider)]
+    hist(data)
+  })
+  output$plot2 <- renderPlot({
+    data <- histdata[seq_len(input$slider)]
+    hist(data)
+  })
+  output$plot3 <- renderPlot({
+    data <- histdata[seq_len(input$slider)]
+    hist(data)
+  })
+  output$plot4 <- renderPlot({
+    data <- histdata[seq_len(input$slider)]
+    hist(data)
+  })
+  output$plot5 <- renderPlot({
+    data <- histdata[seq_len(input$slider)]
+    hist(data)
+  })
+}
+
+shinyApp(ui, server)
