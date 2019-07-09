@@ -105,6 +105,7 @@ str(for_gs_bimonthly_ttr)
 ## bimonthly_ttr = gs_url("https://docs.google.com/spreadsheets/d/1TiQeStsuwATHWxExV_Pdb2rSuOlOPB3KcYbPKFOj8VQ/edit#gid=0")
 
 # Define UI for application that draws a histogram
+if(interactive()){
 shinyUI(fluidPage(
 
 ## ui.R ##
@@ -163,6 +164,18 @@ dropdownMenu(type = "tasks", badgeStatus = "success",
              taskItem(value = 80, color = "red",
                       "Overall project"
              )
+),
+dropdownMenu(type = "notifications", 
+             icon = icon("user-circle"),
+             notificationItem(
+               text = "User Information",
+               icon = icon("user-tag")
+               ),
+             notificationItem(
+               text = "Settings",
+               icon = icon("user-cog")
+               )
+  
 )
                      ),
 ## --------------------------------------------- Sidebar Content ------------------------------------------------------##
@@ -215,6 +228,8 @@ dashboardSidebar(
              href = "https://rundeck.suplab01.snv.mirantis.net/user/login"),
     menuItem("Salesforce", icon = icon("database"),
              href = "https://mirantis.my.salesforce.com/"),
+    menuItem("Databases", icon = icon("php")),
+    menuItem("Docker", icon = icon("docker")),
     menuItem("Handovers", icon = icon("google"),
              href = "https://docs.google.com/spreadsheets/d/1Wu8gJyzw6o7BS4GoR7pM_NofHyXvOzDMK3O-VVHcB8c/edit#gid=0"),
     menuItem("Jump-Host Access", tabName = "Jump-Host Access", icon = icon("bars")),
@@ -236,32 +251,86 @@ dashboardSidebar(
                     title = "Visualization Trends",
                     # The id lets us use input$tabset1 on the server to find the current tab
                     id = "tabset1",
-                    height = "500px",
+                    height = "750px",
                     width = "750px",
                     tabPanel("First Response Met",
+                             align = "center",
                              HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRNxLt1g_l9p2zDStK3lrj7iLkMruOzjFOr_ZUyoc4nJtXXpkp1TRc7sB83xjGpXLcLLUq8xH0B9iv1/pubchart?oid=1201606802&amp;format=interactive"></iframe>')
                     ),
                     tabPanel("Cases w/o Key 5 Updates",
+                             align = "center",
                              HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRNxLt1g_l9p2zDStK3lrj7iLkMruOzjFOr_ZUyoc4nJtXXpkp1TRc7sB83xjGpXLcLLUq8xH0B9iv1/pubchart?oid=1827778814&amp;format=interactive"></iframe>')
                     ),
                     tabPanel("SLA Percent  Met", "First Tab Content 3"),
                     tabPanel("SLA Percent Missed", "Insert SLA Misses Content"),
                     tabPanel("Overall CR & MW", "Insert Google Chart",
+                             align = "center",
                              HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTq8JfC-o3VDDU303mHaT49nt_FGOHikF_GqLFvBS-le9-AYmBOTGDE5TPRh_XTS_iu4rAu4xdfKUzz/pubchart?oid=1004062925&amp;format=interactive"></iframe>')),
                     tabPanel("Top 10 Account Health"),
                     tabPanel("Case Touches Per Engineer"),
                     tabPanel("Overall Severity Levels"),
                     tabPanel("Overall Time to Resolution"),
                     tabPanel("Summary Statistics"),
+                    tabPanel("Upload Data",
+                             tabBox(
+                               titlePanel("Uploading Files"),
+                               br(),
+                             fileInput("file1", "Choose CSV File",
+                                       multiple = FALSE,
+                                       accept = c("text/csv",
+                                                  "text/comma-separated-values,text/plain",
+                                                  ".csv")),
+                             
+                             # Horizontal line ----
+                             tags$hr(),
+                             
+                             # Input: Checkbox if file has header ----
+                             checkboxInput("header", "Header", TRUE),
+                             
+                             # Input: Select separator ----
+                             radioButtons("sep", "Separator",
+                                          choices = c(Comma = ",",
+                                                      Semicolon = ";",
+                                                      Tab = "\t"),
+                                          selected = ","),
+                             
+                             # Input: Select quotes ----
+                             radioButtons("quote", "Quote",
+                                          choices = c(None = "",
+                                                      "Double Quote" = '"',
+                                                      "Single Quote" = "'"),
+                                          selected = '"'),
+                             
+                             # Horizontal line ----
+                             tags$hr(),
+                             
+                             # Input: Select number of rows to display ----
+                             radioButtons("disp", "Display",
+                                          choices = c(Head = "head",
+                                                      All = "all"),
+                                          selected = "head")
+                             )
+                                          ),
                     tabPanel("+")
                   ),
+                  br(),
+                  br(),
                   #box(plotOutput("plot1", height = 250)),
                   #box(plotOutput("plot2", height = 250)),
                   #box(plotOutput("plot3", height = 250)),
                   #box(plotOutput("plot4", height = 250)),
-                  h1("Handovers"),
+                  fluidRow(
+                    tabBox(
+                  title = "Handovers",
+                  height = "500px",
+                  width = "750px",
                   #HTML('<iframe src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vQhKvFE0uh_YR3o0fAIyh7fKZ4P_cd2oH9EKGY7HU4I-QG6GvUlHN7KKdQVXzEvtjn04I7TWyDM45pD/pubhtml?widget=true&amp;headers=false"></iframe>'),
-                  #DT::dataTableOutput("mytable", width = "auto", height = "auto"),
+                  DT::dataTableOutput("mytable", width = "auto", height = "auto")
+                    )
+                  ),
+                  br(),
+                  br(),
+                  br(),
                   #box(plotOutput("plot1", height = 250)),
                   #box(gs_read(ss, ws = "handover")),
                   #box(plotOutput("plot3", height = 250)),
@@ -388,23 +457,9 @@ dashboardSidebar(
                 h1("The VW Google Sheet"),
                 fluidRow(
                   tabBox(
-                    id = "VWDT",
-                    tabPanel("VW Output",
-                             DT::dataTableOutput("mytable2", width = "auto", height = "auto")
-                    ),
-                    tabPanel("VW DEMO",
-                             DT::dataTableOutput("vw_demo", width = "auto", height = "auto")
-                    ),
-                    tabPanel("SLA VW Tracking",
-                             DT::dataTableOutput("auto_vw", width = "100%", height = "auto")
-                             
-                    )
-                  )
-                ),
-                fluidRow(
-                  tabBox(
                     id = "VWA",
                     height = "500px",
+                    width = "750px",
                     tabPanel("Count of Cloud",
                              HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=787540835&amp;format=interactive"></iframe>')
                     ),
@@ -424,6 +479,7 @@ dashboardSidebar(
                   tabBox(
                     id = "VWB",
                     height = "500px",
+                    width = "750px",
                     tabPanel("Agent Report Time",
                              HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=563811911&amp;format=interactive"></iframe>')
                     ),
@@ -440,6 +496,7 @@ dashboardSidebar(
                   tabBox(
                     id = "VWC",
                     height = "500px",
+                    width = "750px",
                     tabPanel("Compute",
                              HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=1697665214&amp;format=interactive"></iframe>')
                     ),
@@ -455,17 +512,34 @@ dashboardSidebar(
                   )
                 ),
                 fluidRow(
-                  box(title = "Count of Actual Resolution Met", background = "red", solidHeader = TRUE, align = "center",
+                  box(width = "750px",title = "Count of Actual Resolution Met", background = "red", solidHeader = TRUE, align = "center",
                       HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=1695935826&amp;format=interactive"></iframe>')
                   ),
-                  box(title = "Count of Actual Response Met", background = "red", solidHeader = TRUE, align = "center",
+                  box(width = "750px",title = "Count of Actual Response Met", background = "red", solidHeader = TRUE, align = "center",
                       HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=1680885140&amp;format=interactive"></iframe>')
                   ),
-                  box(title = "Bar Count for Resolution", background = "red", solidHeader = TRUE, align = "center",
+                  box(width = "750px",title = "Bar Count for Resolution", background = "red", solidHeader = TRUE, align = "center",
                       HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=543988029&amp;format=interactive"></iframe>')
                   ),
-                  box(title = "Bar Count of Actual Response", background = "red", solidHeader = TRUE, align = "center",
+                  box(width = "750px",title = "Bar Count of Actual Response", background = "red", solidHeader = TRUE, align = "center",
                       HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vRewlZFMLuVy2n8kqzM5yJdDsEUP0p9gFKy47Wi_EvHckd4r_NbYC_VRR13rynX2FxRnRuRrrnEyfMu/pubchart?oid=1133411936&amp;format=interactive"></iframe>')
+                  )
+                ),
+                fluidRow(
+                  tabBox(
+                    height = "500px",
+                    width = "750px",
+                    id = "VWDT",
+                    tabPanel("VW Output",
+                             DT::dataTableOutput("mytable2", width = "auto", height = "auto")
+                    ),
+                    tabPanel("VW DEMO",
+                             DT::dataTableOutput("vw_demo", width = "auto", height = "auto")
+                    ),
+                    tabPanel("SLA VW Tracking",
+                             DT::dataTableOutput("auto_vw", width = "100%", height = "auto")
+                             
+                    )
                   )
                 )
         ),
@@ -502,3 +576,4 @@ dashboardSidebar(
     )
   )
 ))
+}
