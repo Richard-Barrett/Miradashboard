@@ -88,12 +88,26 @@ shinyServer(function(input, output){
   
   #oauth2.0_token(google_app)
   ## ---------- Google Authentication ---------- ##
-  #gs_auth(token = NULL ,new_user = FALSE,
-  #        key = getOption("390198683818-i5fmprq9h09vcn6niu7v91bku2dvk1v5.apps.googleusercontent.com"),
-  #        secret = getOption("bDkrVewW5eRxxSpdFH6Ka5mz"),
-  #        cache = getOption("googlesheets.httr_oauth_cache"), verbose = TRUE)
+  gs_auth(token = NULL ,new_user = FALSE,
+          key = getOption("390198683818-i5fmprq9h09vcn6niu7v91bku2dvk1v5.apps.googleusercontent.com"),
+          secret = getOption("bDkrVewW5eRxxSpdFH6Ka5mz"),
+          cache = getOption("googlesheets.httr_oauth_cache"), verbose = TRUE)
   
-  gs_auth()
+  oauth2.0_token(
+    endpoint = oauth_endpoints("google"),
+    app = oauth_app(
+      "google", 
+      key = getOption("390198683818-i5fmprq9h09vcn6niu7v91bku2dvk1v5.apps.googleusercontent.com"), 
+      secret = getOption("bDkrVewW5eRxxSpdFH6Ka5mz")
+    ),
+    scope = c(
+      "https://spreadsheets.google.com/feeds", 
+      "https://www.googleapis.com/auth/drive"),
+    use_oob = FALSE,
+    cache = TRUE
+  )
+  
+  #gs_auth()
   
   for_gs_sheet <- gs_read(handover)
   str(for_gs_sheet)
@@ -174,4 +188,5 @@ shinyServer(function(input, output){
     })
     
 })
+  
   
