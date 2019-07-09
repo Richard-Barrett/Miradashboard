@@ -67,6 +67,8 @@ str(for_gs_bimonthly_ttr)
 
 # Define server logic required to draw a histogram
 shinyServer(function(input, output){ 
+  set.seed(122)
+  histdata <- rnorm(500)
   #auth.code <- oauth2.0_token(endpoint = oauth_endpoints("google"),
   #                            app = app,
   #                            scope = "https://www.googleapis.com/auth/userinfo.profile")
@@ -172,5 +174,4 @@ shinyServer(function(input, output){
     })
     
 })
-  
   
