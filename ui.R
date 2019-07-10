@@ -9,6 +9,7 @@
 
 library(shiny)
 library(shinydashboard)
+library(shinyjs)
 library(googlesheets)
 library(googleCharts)
 library(googleAuthR)
@@ -22,6 +23,21 @@ library(mosaic)
 library(DT)
 library(httpuv)
 library(htmltools)
+
+# Loading Screen for Shiny Application
+appCSS <- "
+#loading-content {
+position: absolute;
+background: #000000;
+opacity: 0.9;
+z-index: 100;
+left: 0;
+right: 0;
+height: 100%;
+text-align: center;
+color: #FFFFFF;
+}
+"
 
 #google_app <- oauth_app(
 #  "google",
@@ -111,6 +127,24 @@ shinyUI(fluidPage(
 ## ui.R ##
 ## --------------------------------------------- Header Content ------------------------------------------------------##
   ui <-dashboardPage(skin = "red",
+                     
+                     # -------------------- Loading-Screen -------------------- #
+                     #useShinyjs(),
+                     #inlineCSS(appCSS),
+                     
+                      #Loading message
+                     #div(
+                       #id = "loading-content",
+                       #h2("Loading...")
+                     #),
+                     
+                     #hidden(
+                       #div(
+                         #id = "app-content",
+                         #p("This is a simple example of a Shiny app with a loading screen.")
+                       #)
+                     #)
+                     
                      dashboardHeader(title = "Miradashboard",
 # This drop-down menu offers user and system administration within the application
                                      dropdownMenu(type = "messages",
@@ -228,7 +262,8 @@ dashboardSidebar(
              href = "https://rundeck.suplab01.snv.mirantis.net/user/login"),
     menuItem("Salesforce", icon = icon("database"),
              href = "https://mirantis.my.salesforce.com/"),
-    menuItem("Databases", icon = icon("php")),
+    menuItem("Databases", icon = icon("php"),
+             href = "http://172.16.241.171/phpmyadmin/"),
     menuItem("Docker", icon = icon("docker")),
     menuItem("Handovers", icon = icon("google"),
              href = "https://docs.google.com/spreadsheets/d/1Wu8gJyzw6o7BS4GoR7pM_NofHyXvOzDMK3O-VVHcB8c/edit#gid=0"),
@@ -245,8 +280,14 @@ dashboardSidebar(
     dashboardBody(
       tabItems(
         tabItem(tabName = "dashboard",
-                h5("Dashboard Tab Content"),
+                h5("Main Dashboard Tab Content"),
                 fluidRow(
+                  box(
+                    width = "750px",
+                    title = "Main Dashboard Content",
+                    background = "black",
+                    solidHeader = TRUE, 
+                    collapsible = TRUE,
                   tabBox(
                     title = "Visualization Trends",
                     # The id lets us use input$tabset1 on the server to find the current tab
@@ -254,23 +295,61 @@ dashboardSidebar(
                     height = "750px",
                     width = "750px",
                     tabPanel("First Response Met",
-                             align = "center",
+                             fluidRow(
+                               h5("https://docs.google.com/spreadsheets/d/1jGo4qH5Xw_uH59XFJEU3a7SOTV12GfPcq9Iin81KGuU/edit#gid=0"),
+                             box(
+                             title = "Bar Chart", 
+                              solidHeader = TRUE, 
+                                collapsible = TRUE,
+                                background = "red",
+                                align = "center",
                              HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRNxLt1g_l9p2zDStK3lrj7iLkMruOzjFOr_ZUyoc4nJtXXpkp1TRc7sB83xjGpXLcLLUq8xH0B9iv1/pubchart?oid=1201606802&amp;format=interactive"></iframe>')
+                             ),
+                             box(
+                               title = "Summary Analysis", 
+                               solidHeader = TRUE, 
+                               collapsible = TRUE,
+                               background = "red",
+                               align = "center",
+                               HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vQuxbru4jnFmzPOCAu0Lp5SJdO0TPaLsmpu2MoyKzPU9r5n9X1CPpdLErwISxY-ZJPcVyF0YwV1OxHY/pubchart?oid=134814464&amp;format=interactive"></iframe>')
+                               
+                             )
+                             )
                     ),
                     tabPanel("Cases w/o Key 5 Updates",
                              align = "center",
                              HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vRNxLt1g_l9p2zDStK3lrj7iLkMruOzjFOr_ZUyoc4nJtXXpkp1TRc7sB83xjGpXLcLLUq8xH0B9iv1/pubchart?oid=1827778814&amp;format=interactive"></iframe>')
                     ),
-                    tabPanel("SLA Percent  Met", "First Tab Content 3"),
-                    tabPanel("SLA Percent Missed", "Insert SLA Misses Content"),
+                    tabPanel("SLA Percent Met Open",
+                             align = "center",
+                             HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vQuxbru4jnFmzPOCAu0Lp5SJdO0TPaLsmpu2MoyKzPU9r5n9X1CPpdLErwISxY-ZJPcVyF0YwV1OxHY/pubchart?oid=1574130033&amp;format=interactive"></iframe>')),
+                    tabPanel("SLA Percent Met Pending",
+                             h5("https://docs.google.com/spreadsheets/d/1jGo4qH5Xw_uH59XFJEU3a7SOTV12GfPcq9Iin81KGuU/edit#gid=1750932163"),
+                             align = "center",
+                             HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vQuxbru4jnFmzPOCAu0Lp5SJdO0TPaLsmpu2MoyKzPU9r5n9X1CPpdLErwISxY-ZJPcVyF0YwV1OxHY/pubchart?oid=216517026&amp;format=interactive"></iframe>')),
+                    tabPanel("SLA Percent Met On-Hold",
+                             align ="center",
+                             HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vQuxbru4jnFmzPOCAu0Lp5SJdO0TPaLsmpu2MoyKzPU9r5n9X1CPpdLErwISxY-ZJPcVyF0YwV1OxHY/pubchart?oid=1307309230&amp;format=interactive"></iframe>')),
                     tabPanel("Overall CR & MW", "Insert Google Chart",
                              align = "center",
                              HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vTq8JfC-o3VDDU303mHaT49nt_FGOHikF_GqLFvBS-le9-AYmBOTGDE5TPRh_XTS_iu4rAu4xdfKUzz/pubchart?oid=1004062925&amp;format=interactive"></iframe>')),
                     tabPanel("Top 10 Account Health"),
-                    tabPanel("Case Touches Per Engineer"),
-                    tabPanel("Overall Severity Levels"),
-                    tabPanel("Overall Time to Resolution"),
-                    tabPanel("Summary Statistics"),
+                    tabPanel("Case Touches Per Engineer",
+                             align = "center",
+                             HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vQuxbru4jnFmzPOCAu0Lp5SJdO0TPaLsmpu2MoyKzPU9r5n9X1CPpdLErwISxY-ZJPcVyF0YwV1OxHY/pubchart?oid=1705841753&amp;format=interactive"></iframe>')),
+                    tabPanel("L1 v. TET Queue Count",
+                             align ="center",
+                             HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vQuxbru4jnFmzPOCAu0Lp5SJdO0TPaLsmpu2MoyKzPU9r5n9X1CPpdLErwISxY-ZJPcVyF0YwV1OxHY/pubchart?oid=236723210&amp;format=interactive"></iframe>')),
+                    tabPanel("Count of Violation Open Cases",
+                             align = "center",
+                             HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vQuxbru4jnFmzPOCAu0Lp5SJdO0TPaLsmpu2MoyKzPU9r5n9X1CPpdLErwISxY-ZJPcVyF0YwV1OxHY/pubchart?oid=1574130033&amp;format=interactive"></iframe>')),
+                    tabPanel("Overall Time to Resolution",
+                             h5("https://docs.google.com/spreadsheets/d/1jGo4qH5Xw_uH59XFJEU3a7SOTV12GfPcq9Iin81KGuU/edit#gid=0"),
+                             align = "center",
+                             HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vQuxbru4jnFmzPOCAu0Lp5SJdO0TPaLsmpu2MoyKzPU9r5n9X1CPpdLErwISxY-ZJPcVyF0YwV1OxHY/pubchart?oid=1973942920&amp;format=interactive"></iframe>')),
+                    tabPanel("Summary Statistics",
+                             align = "center",
+                             HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vQuxbru4jnFmzPOCAu0Lp5SJdO0TPaLsmpu2MoyKzPU9r5n9X1CPpdLErwISxY-ZJPcVyF0YwV1OxHY/pubchart?oid=1571106899&amp;format=interactive"></iframe>')),
                     tabPanel("Upload Data",
                              tabBox(
                                titlePanel("Uploading Files"),
@@ -312,6 +391,7 @@ dashboardSidebar(
                              )
                                           ),
                     tabPanel("+")
+                  )
                   ),
                   br(),
                   br(),
@@ -319,14 +399,14 @@ dashboardSidebar(
                   #box(plotOutput("plot2", height = 250)),
                   #box(plotOutput("plot3", height = 250)),
                   #box(plotOutput("plot4", height = 250)),
-                  fluidRow(
-                    tabBox(
-                  title = "Handovers",
-                  height = "500px",
-                  width = "750px",
+                  box(
+                    width = "750px",
+                    title = "Active Handovers",
+                    background = "red", 
+                    solidHeader = TRUE, 
+                    collapsible = TRUE, 
                   #HTML('<iframe src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vQhKvFE0uh_YR3o0fAIyh7fKZ4P_cd2oH9EKGY7HU4I-QG6GvUlHN7KKdQVXzEvtjn04I7TWyDM45pD/pubhtml?widget=true&amp;headers=false"></iframe>'),
                   DT::dataTableOutput("mytable", width = "auto", height = "auto")
-                    )
                   ),
                   br(),
                   br(),
@@ -346,10 +426,18 @@ dashboardSidebar(
                   #    "This is the content"
                   #  )
                   box(
-                    title = "Weekly Overall TTR", background = "red", solidHeader = TRUE,
-                    plotOutput("plot1", height = 350)),
+                    title = "Overall TTR", 
+                    background = "red", 
+                    solidHeader = TRUE, 
+                    collapsible = TRUE, 
+                    HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/a/mirantis.com/spreadsheets/d/e/2PACX-1vQuxbru4jnFmzPOCAu0Lp5SJdO0TPaLsmpu2MoyKzPU9r5n9X1CPpdLErwISxY-ZJPcVyF0YwV1OxHY/pubchart?oid=1868381473&amp;format=interactive"></iframe>')
+                    #plotOutput("plot1", height = 350)
+                    ),
                   box(
-                    title = "Overall CR & MW Status", background = "red", solidHeader = TRUE,
+                    title = "Overall CR & MW Status", 
+                    background = "red", 
+                    solidHeader = TRUE, 
+                    collapsible = TRUE,
                     plotOutput("plot2", height = 350)),
                   box(
                     title = "Controls",
@@ -549,6 +637,8 @@ dashboardSidebar(
                   DT::dataTableOutput("mytable1", width = "auto", height = "auto")
                 )
         ),
+        tabItem(tabName = "Databases"
+                ),
         tabItem(tabName = "Jump-Host Access",
                 h2("Jump-Host Access Tab Content")
         ),
