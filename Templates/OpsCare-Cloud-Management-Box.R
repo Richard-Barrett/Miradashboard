@@ -1,7 +1,7 @@
 fluidRow(
   box(
     width = "750px",
-    title = "All Cox Cases",
+    title = "All <insert_cloud_name> Cases",
     background = "red",
     solidHeader = TRUE,
     collapsible = TRUE,
@@ -14,14 +14,14 @@ fluidRow(
       tabPanel("Case Management Information",
                fluidRow(
                  align = "center",
-                 h5("https://docs.google.com/spreadsheets/d/1q9STlLeg63UnU65zHLSWPuMVOjo46rXtRyQCi52w7Js/edit?usp=sharing"),
+                 h5("<insert_google_spreadsheet_link>"),
                  box(
                    title = "Count of Violations",
                    solidHeader = TRUE,
                    collapsible = TRUE,
                    background = "red",
                    align = "center",
-                   HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQuxbru4jnFmzPOCAu0Lp5SJdO0TPaLsmpu2MoyKzPU9r5n9X1CPpdLErwISxY-ZJPcVyF0YwV1OxHY/pubchart?oid=1973942920&amp;format=interactive"></iframe>')
+                   HTML('')
                  ),
                  box(
                    title = "Count of Case Status",
@@ -29,7 +29,7 @@ fluidRow(
                    collapsible = TRUE,
                    background = "red",
                    align = "center",
-                   HTML('<iframe width="600" height="371" seamless frameborder="0" scrolling="no" src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQuxbru4jnFmzPOCAu0Lp5SJdO0TPaLsmpu2MoyKzPU9r5n9X1CPpdLErwISxY-ZJPcVyF0YwV1OxHY/pubchart?oid=2006055022&amp;format=interactive"></iframe>')
+                   HTML('')
                    
                  )
                )
@@ -37,7 +37,7 @@ fluidRow(
       tabPanel("Cloud Information",
                fluidRow(
                  align = "center",
-                 h5("https://docs.google.com/spreadsheets/d/1q9STlLeg63UnU65zHLSWPuMVOjo46rXtRyQCi52w7Js/edit?usp=sharing"),
+                 h5("<insert_google_spreadsheet_link>"),
                  box(
                    title = "Count of Customer Tier",
                    solidHeader = TRUE,
