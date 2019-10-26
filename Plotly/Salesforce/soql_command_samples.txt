@@ -1,0 +1,16 @@
+EXAMPLE SOQL COMMANDS WORK BELOW:
+
+1. 
+select ID,  KnowledgeArticleId, Title from How_To__kav/FAQ__kav/SOP__kav/Solution_From_Ticket__kav/Technical_Bullentin_Notice__kav
+
+2. 
+select CaseId, OldValue, NewValue, Field from CaseHistory where Field='Severity_Level__c'
+
+3. 
+SELECT  Id,  DeveloperName FROM Report WHERE DeveloperName = '<name>' 
+
+4. 
+select Environment2__r.Name FROM Case
+
+5. 
+Select Owner.Name from Case
