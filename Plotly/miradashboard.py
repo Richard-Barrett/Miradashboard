@@ -12,13 +12,26 @@ import plotly
 from dash.dependencies import Input, Output, State
 from simple_salesforce import Salesforce
 #from login import *
+import json
 
 # Authentication
+decrypt = "gpg --output secrets.json --decrypt secrets.gpg"
 
+if os.path.exists("secrets.gpg"):
+        returned_value = subprocess.call(decrypt, shell=True)
+else:
+        print("The file does not exist encryption on secrets.json not in use")
+#continue
+
+with open('secrets.json','r') as f:
+        config = json.load(f)
+        
 # Salesforce User Session and Fields
 # ==================================
 from simple_salesforce import SalesforceAPI
-sf = SalesforceAPI('###.com', '###!', '###')
+sf = SalesforceAPI((config['username']),
+                   (config['password']),
+                   (config['token')])
 
 #sf_sec = Salesforce(username = username,
 #		password = password,
@@ -30,8 +43,8 @@ Fields = ['isMosAlert__c',
               'Milestone_violated__c',
               'First_Reply__c',
               'CaseNumber',
-	      'Environment2__r.Name',
-	      'Owner.Name',
+              'Environment2__r.Name',
+	          'Owner.Name',
               'Severity_Level__c',
               'Status',
               'Subject',
